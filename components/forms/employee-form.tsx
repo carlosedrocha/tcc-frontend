@@ -40,26 +40,26 @@ export const IMG_MAX_LIMIT = 3;
 const formSchema = z.object({
   name: z
     .string()
-    .min(3, { message: 'Product Name must be at least 3 characters' }),
+    .min(3, { message: 'Employee Name must be at least 3 characters' }),
   imgUrl: z
     .array(ImgSchema)
-    .max(IMG_MAX_LIMIT, { message: 'You can only add up to 3 images' })
-    .min(1, { message: 'At least one image must be added.' }),
+    .max(IMG_MAX_LIMIT, { message: 'You can only add up to 3 images' }),
+  // .min(0, { message: 'At least one image must be added.' }),
   description: z
     .string()
-    .min(3, { message: 'Product description must be at least 3 characters' }),
+    .min(3, { message: 'Employee description must be at least 3 characters' }),
   price: z.coerce.number(),
   category: z.string().min(1, { message: 'Please select a category' })
 });
 
-type ProductFormValues = z.infer<typeof formSchema>;
+type EmployeeFormValues = z.infer<typeof formSchema>;
 
-interface ProductFormProps {
+interface EmployeeFormProps {
   initialData: any | null;
   categories: any;
 }
 
-export const EmployeeForm: React.FC<ProductFormProps> = ({
+export const EmployeeForm: React.FC<EmployeeFormProps> = ({
   initialData,
   categories
 }) => {
@@ -68,9 +68,9 @@ export const EmployeeForm: React.FC<ProductFormProps> = ({
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const title = initialData ? 'Edit product' : 'Create product';
-  const description = initialData ? 'Edit a product.' : 'Add a new product';
-  const toastMessage = initialData ? 'Product updated.' : 'Product created.';
+  const title = initialData ? 'Edit employee' : 'Create employee';
+  const description = initialData ? 'Edit a employee.' : 'Add a new employee';
+  const toastMessage = initialData ? 'Employee updated.' : 'Employee created.';
   const action = initialData ? 'Save changes' : 'Create';
 
   const defaultValues = initialData
@@ -83,22 +83,22 @@ export const EmployeeForm: React.FC<ProductFormProps> = ({
         category: ''
       };
 
-  const form = useForm<ProductFormValues>({
+  const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues
   });
 
-  const onSubmit = async (data: ProductFormValues) => {
+  const onSubmit = async (data: EmployeeFormValues) => {
     try {
       setLoading(true);
       if (initialData) {
-        // await axios.post(`/api/products/edit-product/${initialData._id}`, data);
+        // await axios.post(`/api/employees/edit-employee/${initialData._id}`, data);
       } else {
-        // const res = await axios.post(`/api/products/create-product`, data);
-        // console.log("product", res);
+        // const res = await axios.post(`/api/employees/create-employee`, data);
+        // console.log("employee", res);
       }
       router.refresh();
-      router.push(`/dashboard/products`);
+      router.push(`/dashboard/employees`);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
@@ -118,9 +118,9 @@ export const EmployeeForm: React.FC<ProductFormProps> = ({
   const onDelete = async () => {
     try {
       setLoading(true);
-      //   await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
+      //   await axios.delete(`/api/${params.storeId}/employees/${params.employeeId}`);
       router.refresh();
-      router.push(`/${params.storeId}/products`);
+      router.push(`/${params.storeId}/employees`);
     } catch (error: any) {
     } finally {
       setLoading(false);
@@ -184,7 +184,7 @@ export const EmployeeForm: React.FC<ProductFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Product name"
+                      placeholder="Employee name"
                       {...field}
                     />
                   </FormControl>
@@ -201,7 +201,7 @@ export const EmployeeForm: React.FC<ProductFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Product description"
+                      placeholder="Employee description"
                       {...field}
                     />
                   </FormControl>
