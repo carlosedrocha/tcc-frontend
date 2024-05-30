@@ -37,6 +37,17 @@ api.interceptors.request.use(async (config: any) => {
 
   return newConfig;
 });
-
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      // Redirect to the login page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+    }
+    // return Promise.reject(error);
+  }
+);
 //module.exports = api;
 export default api;
