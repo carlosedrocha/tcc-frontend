@@ -1,5 +1,4 @@
-import { Icons } from '@/components/icons';
-import { NavItem, SidebarNavItem } from '@/types';
+import { NavItem } from '@/types';
 
 export type User = {
   id: number;
@@ -119,19 +118,25 @@ export const navItems: NavItem[] = [
     label: 'Dashboard'
   },
   {
-    title: 'User',
-    href: '/dashboard/user',
+    title: 'Funcionários',
+    href: '/dashboard/employee',
     icon: 'user',
     label: 'user'
   },
   {
-    title: 'Employee',
+    title: 'Mudar ',
     href: '/dashboard/employee',
     icon: 'employee',
     label: 'employee'
   },
   {
-    title: 'Profile',
+    title: 'Tipo de Item',
+    href: '/dashboard/item-type',
+    icon: 'employee',
+    label: 'item-type'
+  },
+  {
+    title: 'Mudar o',
     href: '/dashboard/profile',
     icon: 'profile',
     label: 'profile'
@@ -147,5 +152,18 @@ export const navItems: NavItem[] = [
     href: '/',
     icon: 'login',
     label: 'login'
+  }
+];
+
+export type ItemTypeT = {
+  name: string;
+};
+
+export const itemTypes: ItemTypeT[] = [
+  {
+    name: 'tipo de item 1'
+  },
+  {
+    name: 'tipo de item 2'
   }
 ];
