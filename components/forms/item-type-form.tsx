@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Trash } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -34,15 +34,25 @@ interface ItemTypeFormProps {
 }
 
 export const ItemTypeForm: React.FC<ItemTypeFormProps> = ({ initialData }) => {
+
   const params = useParams();
-  const router = useRouter();
+  const router = useRouter();  
+  const searchParams = useSearchParams();
+  const name = searchParams.get('name');
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  initialData = {
+    id: params['item-typeId'],
+    name: name,
+  }
+
   const title = initialData ? 'Editar Item' : 'Criar Item';
   const description = initialData ? 'Editar Item' : 'Adicionar novo Item';
   const toastMessage = initialData ? 'Atualizado' : 'Criado';
   const action = initialData ? 'Salvar' : 'Criar';
+
 
   const defaultValues = initialData
     ? initialData

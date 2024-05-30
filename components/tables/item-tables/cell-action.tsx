@@ -27,8 +27,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     // Add your delete logic here
     try {
       await api.delete(`/item-type/${data.id}`);
-      setOpen(false);
       router.refresh();
+      setOpen(false);
       router.push(`/dashboard/item-type`);
     } catch (error: any) {}
   };
@@ -51,7 +51,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Ações</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/item-type/${data.id}?name=${data.name}`)}
+            onClick={() => router.push(`/dashboard/item-type/${data.id}`)}
           >
             <Edit className="mr-2 h-4 w-4" /> Atualizar
           </DropdownMenuItem>
