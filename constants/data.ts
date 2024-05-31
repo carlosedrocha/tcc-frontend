@@ -91,7 +91,10 @@ export const users: User[] = [
     status: 'Active'
   }
 ];
-
+export type CategoryDish={
+  id:string,
+  name:string
+}
 export type Employee = {
   id: number;
   first_name: string;
@@ -117,6 +120,12 @@ export const navItems: NavItem[] = [
     href: '/dashboard',
     icon: 'dashboard',
     label: 'Dashboard'
+  },
+  {
+    title: 'Categoria de pratos',
+    href: '/dashboard/category-dish',
+    icon: 'sandwich',
+    label :'sandwich'
   },
   {
     title: 'User',
