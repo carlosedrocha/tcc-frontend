@@ -23,7 +23,6 @@ export const CellActionCategoryDish: React.FC<CellActionProps> = ({ data }) => {
   const router = useRouter();
   const name = encodeURIComponent(data.name);
   const onConfirm = async () => {};
-
   return (
     <>
       <AlertModal
@@ -43,7 +42,7 @@ export const CellActionCategoryDish: React.FC<CellActionProps> = ({ data }) => {
           <DropdownMenuLabel>Ações</DropdownMenuLabel>
 
           <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/category-dish/${data.id}`)}
+            onClick={() => router.push(`/dashboard/category-dish/${data.id}?name=${data.name}`)}
           >
             <Edit className="mr-2 h-4 w-4" /> Editar
           </DropdownMenuItem>

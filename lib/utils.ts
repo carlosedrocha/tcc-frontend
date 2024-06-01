@@ -10,6 +10,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+
 export function hasDraggableData<T extends Active | Over>(
   entry: T | null | undefined
 ): entry is T & {

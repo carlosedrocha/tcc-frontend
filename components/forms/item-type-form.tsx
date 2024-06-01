@@ -43,10 +43,10 @@ export const ItemTypeForm: React.FC<ItemTypeFormProps> = ({ initialData }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  initialData = {
+  initialData =params['item-typeId']!=="new" ?{
     id: params['item-typeId'],
     name: name,
-  }
+  }:null
 
   const title = initialData ? 'Editar Item' : 'Criar Item';
   const description = initialData ? 'Editar Item' : 'Adicionar novo Item';
@@ -72,6 +72,7 @@ export const ItemTypeForm: React.FC<ItemTypeFormProps> = ({ initialData }) => {
         await api.put(`item-type/${initialData.id}`, data);
       } else {
         const res = await api.post(`/item-type`, data);
+        console.log(res )
         // console.log('item', res);
       }
       router.refresh();

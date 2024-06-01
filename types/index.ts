@@ -1,5 +1,4 @@
 import { Icons } from '@/components/icons';
-
 export interface NavItem {
   title: string;
   href?: string;
@@ -8,7 +7,9 @@ export interface NavItem {
   icon?: keyof typeof Icons;
   label?: string;
   description?: string;
+  children?: NavItem[];
 }
+
 
 export interface NavItemWithChildren extends NavItem {
   items: NavItemWithChildren[];

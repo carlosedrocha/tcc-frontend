@@ -1,10 +1,10 @@
 'use client';
-import { ItemTypeI } from '@/app/(dashboard)/dashboard/item-type/page';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Item } from '@/constants/data';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 
-export const columns: ColumnDef<ItemTypeI>[] = [
+export const columns: ColumnDef<Item>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -24,13 +24,29 @@ export const columns: ColumnDef<ItemTypeI>[] = [
     enableSorting: false,
     enableHiding: false
   },
-  // {
-  //   accessorKey: 'id',
-  //   header: 'ID'
-  // },
   {
     accessorKey: 'name',
-    header: 'NOME'
+    header: 'Nome'
+  },
+  {
+    accessorKey: 'description',
+    header: 'Descrição'
+  },
+  {
+    accessorKey: 'cost',
+    header: 'Preço'
+  },
+  {
+    accessorKey: 'measurementUnitValue',
+    header: 'Valor da unidade'
+  },
+  {
+    accessorKey: 'measurementUnit',
+    header: 'Unidade'
+  },
+  {
+    accessorKey: 'typeName',
+    header: 'Tipo do item'
   },
   {
     id: 'actions',

@@ -93,6 +93,16 @@ export const users: User[] = [
 export type CategoryDish={
   id:string,
   name:string
+} 
+export type Item={
+  id:string;
+  name: string;
+  description: string;
+  measurementUnit: string;
+  measurementUnitValue: number;
+  cost: number;
+  typeId: string;
+  typeName: string;
 }
 export type Employee = {
   id: number;
@@ -113,16 +123,26 @@ export type Employee = {
   profile_picture?: string | null; // Profile picture can be a string (URL) or null (if no picture)
 };
 
+//Utilizar em regex de inputs para aceitar somente numero
+export const numericPattern = /^[0-9]+([,.][0-9]+)?$/;
+
+
 export const navItems: NavItem[] = [
   {
-    title: 'Dashboard',
+    title: 'Inicio',
     href: '/dashboard',
-    icon: 'dashboard',
-    label: 'Dashboard'
+    icon: 'home',
+    label: 'home'
   },
   {
-    title: 'Categoria de pratos',
-    href: '/dashboard/category-dish',
+    title: 'Tipo de Item',
+    href: '/dashboard/item-type',
+    icon: 'sandwich',
+    label: 'item-type'
+  },
+  {
+    title: 'Cadastro de Item',
+    href: '/dashboard/item',
     icon: 'sandwich',
     label :'sandwich'
   },
@@ -133,10 +153,10 @@ export const navItems: NavItem[] = [
     label :'sandwich'
   },
   {
-    title: 'Funcionários',
-    href: '/dashboard/employee',
-    icon: 'user',
-    label: 'user'
+    title:'Comandas',
+    href:'/dashboard/tabs',
+    icon:'tab',
+    label:'tab'
   },
   {
     title: 'Mudar ',
@@ -145,23 +165,17 @@ export const navItems: NavItem[] = [
     label: 'employee'
   },
   {
-    title: 'Tipo de Item',
-    href: '/dashboard/item-type',
-    icon: 'employee',
-    label: 'item-type'
-  },
-  {
     title: 'Mudar o',
     href: '/dashboard/profile',
     icon: 'profile',
     label: 'profile'
   },
-  {
-    title: 'Kanban',
-    href: '/dashboard/kanban',
-    icon: 'kanban',
-    label: 'kanban'
-  },
+  // {
+  //   title: 'Kanban',
+  //   href: '/dashboard/kanban',
+  //   icon: 'kanban',
+  //   label: 'kanban'
+  // },
   {
     title: 'Login',
     href: '/',
