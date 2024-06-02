@@ -1,3 +1,4 @@
+'use client'
 import { CalendarDateRangePicker } from '@/components/date-range-picker';
 import { Overview } from '@/components/overview';
 import { RecentSales } from '@/components/recent-sales';
@@ -9,13 +10,114 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
+import { useRouter } from 'next/navigation';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 export default function page() {
+  const router = useRouter();
+
   return (
     <ScrollArea className="h-full">
       <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+      <div className="flex flex-wrap gap-4">
+      <Card className="w-[350px]">
+          <CardHeader>
+            <CardTitle>Cadastre o tipo do item</CardTitle>
+            <CardDescription>Realize o cadastro do tipo do item.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form>
+              <div className="grid w-full items-center gap-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="name" className='mb-2'>Tipo de item</Label>
+                  <Link
+              href={'/dashboard/item-type'}
+              className={cn(buttonVariants({ variant: 'default' }))}
+            >
+            Ir para a pagina
+              </Link>
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+        <Card className="w-[350px]">
+          <CardHeader>
+            <CardTitle>Cadastre o item</CardTitle>
+            <CardDescription>Realize o cadastro do seu item.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form>
+              <div className="grid w-full items-center gap-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="name" className='mb-2'>Tipo de item</Label>
+                  <Link
+              href={'/dashboard/item'}
+              className={cn(buttonVariants({ variant: 'default' }))}
+            >
+            Ir para a pagina
+              </Link>
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                </div>
+              </div>
+            </form>
+          </CardContent>
+          </Card>
+          <Card className="w-[350px]">
+          <CardHeader>
+            <CardTitle>Cadastre a categoria do prato</CardTitle>
+            <CardDescription>Realize o cadastro da categoria do seu prato.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form>
+              <div className="grid w-full items-center gap-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="name"className='mb-2'>Categoria do pratos</Label>
+                  <Link
+              href={'/dashboard/category-dish'}
+              className={cn(buttonVariants({ variant: 'default' }))}
+            >
+            Ir para a pagina
+              </Link>
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                </div>
+              </div>
+            </form>
+          </CardContent>
+          </Card>
+          <Card className="w-[350px]">
+          <CardHeader>
+            <CardTitle>Cadastrado do prato</CardTitle>
+            <CardDescription>Realize o cadastro  seu prato.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form>
+              <div className="grid w-full items-center gap-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="name"className='mb-2'>Categoria do pratos</Label>
+                  <Link
+              href={'/dashboard/category-dish'}
+              className={cn(buttonVariants({ variant: 'default' }))}
+            >
+            Ir para a pagina
+              </Link>
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                </div>
+              </div>
+            </form>
+          </CardContent>
+          </Card>
+      </div>
         {/* <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">
             Hi, Welcome back 👋

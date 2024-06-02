@@ -14,11 +14,12 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Trash } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams  } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useToast } from '../ui/use-toast';
+import { AlertModal } from '../modal/alert-modal';
 export const IMG_MAX_LIMIT = 3;
 const formSchema = z.object({
   name: z
@@ -27,24 +28,31 @@ const formSchema = z.object({
 });
 
 type CategoryDishFormValues = z.infer<typeof formSchema>;
+interface CategoryDishFormProps {
+  initialData: any | null;
+}
 
 
-
-export const CateroyDishForm = () => {
+export const CateroyDishForm : React.FC<CategoryDishFormProps> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
-  const urlParams = new URLSearchParams(params).toString();
-  const urlId = urlParams.split("=")[1];
+  const searchParams = useSearchParams();
+  const name = searchParams.get('name');
   const { toast } = useToast();
-  const [initialData,setinitialData] = useState({});
+  
+  initialData =params['category-dishId']!=="new" ?{
+    id: params['category-dishId'],
+    name: name,
+  }:null
+  console.log(initialData)
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const title = urlId!="new" ? 'Editar Categoria do prato' : 'Cadastrar Categoria do prato';
-  const description = urlId!="new" ? 'Editar Categoria do prato.' : 'Cadastrar Nova Categoria do prato';
-  const toastMessage = urlId!="new" ? 'Categoria de prato atualizada.' : 'Categoria de prato Adicionado.';
-  const action = urlId!="new" ? 'Salvar alterações' : 'Cadastrar';
+  const title = initialData ? 'Editar Categoria do prato' : 'Cadastrar Categoria do prato';
+  const description = initialData ? 'Editar Categoria do prato.' : 'Cadastrar Nova Categoria do prato';
+  const toastMessage = initialData ? 'Categoria de prato atualizada.' : 'Categoria de prato Adicionado.';
+  const action = initialData ? 'Salvar alterações' : 'Cadastrar';
 
-  const defaultValues = urlId!="new"
+  const defaultValues = initialData
     ? initialData
     : {
         name: '',
@@ -54,22 +62,24 @@ export const CateroyDishForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues
   });
-
+  const reloadPage = ()=>{
+    router.refresh();
+    router.push(`/dashboard/category-dish`);
+  }
   const onSubmit = async (data: CategoryDishFormValues) => {
 
     try {
       setLoading(true);
-      if (urlId!="new") {
+      if (initialData) {
         try{
-          const res = await api.put(`/category/${urlId}`,data);
+          const res = await api.put(`/category/${initialData.id}`,data);
           if(res.status===200){
             toast({
               variant: 'destructive',
               title: 'Cadastrado com sucesso.',
               description: 'Categoria do prato AtualIzado com sucesso.'
             });
-            router.refresh();
-            router.push(`/dashboard/category-dish`);
+            reloadPage();
           }
          
         }catch(error){
@@ -78,7 +88,7 @@ export const CateroyDishForm = () => {
             title: 'Erro ao atualizar',
             description: 'Ops. Tivemos um problema ao salvar a categoria do prato, tente novamente mais tarde.'
           });
-          router.refresh();
+          reloadPage();
         }
        
       } else {
@@ -90,8 +100,7 @@ export const CateroyDishForm = () => {
               title: 'Atualizado com sucesso.',
               description: 'Categoria do prato AtualIzado com sucesso.'
             });
-            router.refresh();
-            router.push(`/dashboard/category-dish`);
+            reloadPage();
           }
         }catch(error){
           toast({
@@ -99,7 +108,7 @@ export const CateroyDishForm = () => {
             title: 'Erro ao cadastrar',
             description: 'Ops. Tivemos um problema ao salvar a categoria do prato, tente novamente mais tarde.'
           });
-          router.refresh();
+          reloadPage();
         }
       }
     
@@ -117,40 +126,40 @@ export const CateroyDishForm = () => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      //   await axios.delete(`/api/${params.storeId}/employees/${params.employeeId}`);
-      router.refresh();
-      router.push(`/${params.storeId}/employees`);
+      try{
+        console.log(initialData)
+        const response = await api.delete(`/category/${initialData.id}`);
+        if(response.status===200){
+          toast({
+            variant: 'destructive',
+            title: 'Deletado com sucesso.',
+            description: 'Categoria do prato Deletado com sucesso.'
+          });
+          reloadPage();
+        }
+      }catch(error){
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao deletar',
+          description: 'Não foi possível deletar a categoria do prato'
+        });
+      }
+      reloadPage();
     } catch (error: any) {
     } finally {
       setLoading(false);
       setOpen(false);
     }
   };
-  useEffect(() => {
-    const getCategoryDishes = async () => {
-      try {
-        if(urlId!="new"){
-        const response = await api.get(`/category/${urlId}`, {
-        //   params: { offset, limit: pageLimit }
-        });
-        
-        setinitialData(response.data);
-      }
-      return
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    getCategoryDishes();
-  }, []);
+
   return (
     <>
-      {/* <AlertModal
+      <AlertModal
         isOpen={open}
         onClose={() => setOpen(false)}
         onConfirm={onDelete}
         loading={loading}
-      /> */}
+      />
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
         {initialData && (

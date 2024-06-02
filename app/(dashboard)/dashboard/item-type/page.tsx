@@ -7,7 +7,7 @@ import { ItemTypeTable } from '@/components/tables/item-type-tables/item-type-ta
 import { buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -33,18 +33,18 @@ const Page = ({ searchParams }: paramsProps) => {
   const [data, setData] = useState<ItemTypeI[]>([]);
   const [pageCount, setPageCount] = useState(0);
   const search = searchParams.search || null;
+  const router = useRouter();
   const page = Number(searchParams.page) || 1;
   const pageLimit = Number(searchParams.limit) || 10;
   const offset = (page - 1) * pageLimit;
-
-  useEffect(() => {
+  useEffect(() => { 
     const getItemTypes = async () => {
       try {
         const response = await api.get('/item-type', {
           params: { offset, limit: pageLimit }
         });
 
-        console.log(response.data);
+        console.log(response);
         setData(response.data);
         setPageCount(Math.ceil(response.data.total / pageLimit));
       } catch (error) {
@@ -65,8 +65,8 @@ const Page = ({ searchParams }: paramsProps) => {
 
         <div className="flex items-start justify-between">
           <Heading
-            title={`Itens (${totalItems})`}
-            description="Manage items (Server side table functionalities.)"
+            title={`Tipos de item (${totalItems})`}
+            description="Gerencie seus tipos de Item"
           />
 
           <Link

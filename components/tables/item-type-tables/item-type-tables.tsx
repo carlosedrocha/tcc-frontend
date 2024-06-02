@@ -159,7 +159,7 @@ export function ItemTypeTable<TData, TValue>({
   return (
     <>
       <Input
-        placeholder={`Search ${searchKey}...`}
+        placeholder={`Pesquise pelo nome...`}
         value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
         onChange={(event) =>
           table.getColumn(searchKey)?.setFilterValue(event.target.value)
@@ -209,7 +209,7 @@ export function ItemTypeTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Sem resultados
                 </TableCell>
               </TableRow>
             )}
@@ -221,10 +221,10 @@ export function ItemTypeTable<TData, TValue>({
       <div className="flex flex-col items-center justify-end gap-2 space-x-2 py-4 sm:flex-row">
         <div className="flex w-full items-center justify-between">
           <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{' '}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+            {table.getFilteredSelectedRowModel().rows.length} de{' '}
+            {table.getFilteredRowModel().rows.length} Linhas(s) Selcionada(s).
           </div>
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
+          {/* <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
             <div className="flex items-center space-x-2">
               <p className="whitespace-nowrap text-sm font-medium">
                 Rows per page
@@ -249,9 +249,9 @@ export function ItemTypeTable<TData, TValue>({
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </div> */}
         </div>
-        <div className="flex w-full items-center justify-between gap-2 sm:justify-end">
+        {/* <div className="flex w-full items-center justify-between gap-2 sm:justify-end">
           <div className="flex w-[100px] items-center justify-center text-sm font-medium">
             Page {table.getState().pagination.pageIndex + 1} of{' '}
             {table.getPageCount()}
@@ -294,7 +294,7 @@ export function ItemTypeTable<TData, TValue>({
               <DoubleArrowRightIcon className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
-        </div>
+        </div> */}
       </div>
     </>
   );

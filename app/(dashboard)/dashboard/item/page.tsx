@@ -2,11 +2,12 @@
 
 import api from '@/app/api';
 import BreadCrumb from '@/components/breadcrumb';
-import { columns } from '@/components/tables/item-type-tables/columns';
-import { ItemTypeTable } from '@/components/tables/item-type-tables/item-type-tables';
+import { columns } from '@/components/tables/item-table/columns';
+import { ItemTable } from '@/components/tables/item-table/itemTable';
 import { buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
+import { Item } from '@/constants/data';
 
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
@@ -21,7 +22,7 @@ export interface ItemTypeI {
   deletedAt?: Date;
 }
 
-const breadcrumbItems = [{ title: 'Itens', link: '/dashboard/item-type' }];
+const breadcrumbItems = [{ title: 'Itens', link: '/dashboard/item' }];
 
 type paramsProps = {
   searchParams: {
@@ -30,7 +31,7 @@ type paramsProps = {
 };
 
 const Page = ({ searchParams }: paramsProps) => {
-  const [data, setData] = useState<ItemTypeI[]>([]);
+  const [data, setData] = useState<Item[]>([]);
   const [pageCount, setPageCount] = useState(0);
   const search = searchParams.search || null;
   const page = Number(searchParams.page) || 1;
@@ -38,25 +39,31 @@ const Page = ({ searchParams }: paramsProps) => {
   const offset = (page - 1) * pageLimit;
 
   useEffect(() => {
-    const getItemTypes = async () => {
+    const getItem = async () => {
       try {
-        const response = await api.get('/item-type', {
-          params: { offset, limit: pageLimit }
+        const response = await api.get('/item', {
+          // params: { offset, limit: pageLimit }
         });
-
-        console.log(response.data);
-        setData(response.data);
+        const formattedData = response.data.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          measurementUnit: item.measurementUnit,
+          measurementUnitValue: item.measurementUnitValue,
+          cost: item.cost,
+          typeId: item.itemTypeId,
+          typeName: item.type.name
+        })); 
+        setData(formattedData);
         setPageCount(Math.ceil(response.data.total / pageLimit));
       } catch (error) {
         console.error(error);
       }
     };
-
-    getItemTypes();
+    getItem();
   }, [page, pageLimit, offset]);
 
   const totalItems = data.length;
-  console.log(data);
 
   return (
     <>
@@ -66,11 +73,11 @@ const Page = ({ searchParams }: paramsProps) => {
         <div className="flex items-start justify-between">
           <Heading
             title={`Itens (${totalItems})`}
-            description="Manage items (Server side table functionalities.)"
+            description="Gerencie os items do seu estabelecimento"
           />
 
           <Link
-            href={'/dashboard/item-type/new'}
+            href={'/dashboard/item/new'}
             className={cn(buttonVariants({ variant: 'default' }))}
           >
             <Plus className="mr-2 h-4 w-4" /> Adicionar
@@ -78,7 +85,7 @@ const Page = ({ searchParams }: paramsProps) => {
         </div>
         <Separator />
 
-        <ItemTypeTable
+        <ItemTable
           searchKey="name"
           pageNo={page}
           columns={columns}

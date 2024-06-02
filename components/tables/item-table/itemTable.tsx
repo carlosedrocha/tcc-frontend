@@ -18,7 +18,7 @@ interface DataTableProps<TData, TValue> {
   searchKey: string;
 }
 
-export function CategoryDishTable<TData, TValue>({
+export function ItemTable<TData, TValue>({
   columns,
   data,
   searchKey
@@ -41,7 +41,7 @@ export function CategoryDishTable<TData, TValue>({
   return (
     <>
       <Input
-        placeholder={`Pesquise pelo nome ${searchKey}...`}
+        placeholder={`Pesquise pelo nome...`}
         value={searchValue}
         onChange={(event) => setSearchValue(event.target.value)}
         className="w-full md:max-w-sm"
@@ -78,7 +78,7 @@ export function CategoryDishTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  Sem resultados.
                 </TableCell>
               </TableRow>
             )}

@@ -1,6 +1,7 @@
 'use client';
 import api from '@/app/api';
 import { AlertModal } from '@/components/modal/alert-modal';
+import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,28 +10,26 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { ItemTypeT } from '@/constants/data'; // Adjust the import to your ItemType definition
+import { Item } from '@/constants/data';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
-
 interface CellActionProps {
-  data: ItemTypeT;
+  data: Item;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const router = useRouter();
-
+  const router = useRouter();  
   const onConfirm = async () => {
-    // Add your delete logic here
-    try {
-      await api.delete(`/item-type/${data.id}`);
-      router.refresh();
+    try{
+      await api.delete(`item/${data.id}`)
       setOpen(false);
-      router.push(`/dashboard/item-type`);
-    } catch (error: any) {}
+      router.refresh();
+      router.push(`/dashboard/item`);
+    } catch (error: any) {
+    }
   };
 
   return (
@@ -50,13 +49,14 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Ações</DropdownMenuLabel>
+
           <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/item-type/${data.id}`)}
+            onClick={() => router.push(`/dashboard/item/${data.id}`)}
           >
-            <Edit className="mr-2 h-4 w-4" /> Atualizar
+            <Edit className="mr-2 h-4 w-4" /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className="mr-2 h-4 w-4" /> Deletar
+            <Trash className="mr-2 h-4 w-4" /> Excluir
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
