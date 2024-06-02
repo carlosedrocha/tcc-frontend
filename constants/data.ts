@@ -90,10 +90,6 @@ export const users: User[] = [
     status: 'Active'
   }
 ];
-export type CategoryDish = {
-  id: string;
-  name: string;
-};
 export type Item = {
   id: string;
   name: string;
@@ -104,6 +100,41 @@ export type Item = {
   typeId: string;
   typeName: string;
 };
+
+export type CategoryDish = {
+  id: string;
+  name: string;
+};
+
+export interface IDish {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  photoUrl: null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: null;
+  dishIngredients: IDishIngredient[];
+  categories: ICategory[];
+}
+
+export interface ICategory {
+  id: string;
+  name: string;
+  description: null;
+  observation: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: null;
+}
+
+export interface IDishIngredient {
+  id: string;
+  quantity: number;
+  item: Item;
+}
+
 export type Employee = {
   id: number;
   first_name: string;
@@ -146,13 +177,19 @@ export const navItems: NavItem[] = [
     label: 'sandwich'
   },
   {
-    title: 'Categoria de pratos',
+    title: 'Categoria de Pratos',
     href: '/dashboard/category-dish',
     icon: 'sandwich',
     label: 'sandwich'
   },
   {
-    title: 'Cardapio',
+    title: 'Pratos',
+    href: '/dashboard/dish',
+    icon: 'sandwich',
+    label: 'sandwich'
+  },
+  {
+    title: 'Cardápio',
     href: '/dashboard/menu',
     icon: 'menu',
     label: 'sandwich'
