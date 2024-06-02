@@ -4,7 +4,9 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Brew Master',
-  description: ''
+  description: '',
+  icons:
+    'https://brew-master-dev.s3.us-east-2.amazonaws.com/FundoTrasnparenteLogo.png'
 };
 
 export default function DashboardLayout({

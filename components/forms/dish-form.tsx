@@ -87,7 +87,8 @@ export const DishForm: React.FC<DishFormProps> = ({
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [items, setItems] = useState<any[]>([]);
 
-  let id: string | null | string[] = params['dishId'];
+  let id: string | null | string[] =
+    params['dishId'] != 'new' ? params['dishId'] : '';
   let currentDish: IDish | null = null;
   useEffect(() => {
     const fetchCurrentDish = async () => {
@@ -152,7 +153,6 @@ export const DishForm: React.FC<DishFormProps> = ({
   const description = id !== 'new' ? 'Editar Prato' : 'Adicionar Prato';
   const toastMessage = id !== 'new' ? 'Prato Atualizado' : 'Prato Criado';
   const action = id !== 'new' ? 'Save changes' : 'Create';
-
 
   const defaultValues = initialData
     ? initialData
@@ -219,7 +219,7 @@ export const DishForm: React.FC<DishFormProps> = ({
         description: 'There was a problem with your request.'
       });
     } catch (error: any) {
-      console.log(error)
+      console.log(error);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
@@ -403,7 +403,7 @@ export const DishForm: React.FC<DishFormProps> = ({
               </Button>
             </div>
           </div>
-          {/* aqui todo check why button*/ }
+          {/* aqui todo check why button*/}
           {/* <Button className="ml-auto" type="submit">
             {action}
           </Button> */}

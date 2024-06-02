@@ -239,7 +239,7 @@ export default function Page() {
                 </CardHeader>
                 <CardContent>
                   <Link
-                    href=""
+                    href={`/dashboard/menu?tabId=${tab.id}?name=${tab.name}`}
                     className={cn(buttonVariants({ variant: 'default' }))}
                   >
                     Acessar pedido

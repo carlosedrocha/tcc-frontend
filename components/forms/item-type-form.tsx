@@ -34,25 +34,26 @@ interface ItemTypeFormProps {
 }
 
 export const ItemTypeForm: React.FC<ItemTypeFormProps> = ({ initialData }) => {
-
   const params = useParams();
-  const router = useRouter();  
+  const router = useRouter();
   const searchParams = useSearchParams();
   const name = searchParams.get('name');
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-  initialData =params['item-typeId']!=="new" ?{
-    id: params['item-typeId'],
-    name: name,
-  }:null
+
+  initialData =
+    params['item-typeId'] !== 'new'
+      ? {
+          id: params['item-typeId'],
+          name: name
+        }
+      : null;
 
   const title = initialData ? 'Editar Item' : 'Criar Item';
   const description = initialData ? 'Editar Item' : 'Adicionar novo Item';
   const toastMessage = initialData ? 'Atualizado' : 'Criado';
   const action = initialData ? 'Salvar' : 'Criar';
-
 
   const defaultValues = initialData
     ? initialData
@@ -72,7 +73,7 @@ export const ItemTypeForm: React.FC<ItemTypeFormProps> = ({ initialData }) => {
         await api.put(`item-type/${initialData.id}`, data);
       } else {
         const res = await api.post(`/item-type`, data);
-        console.log(res )
+        console.log(res);
         // console.log('item', res);
       }
       router.refresh();

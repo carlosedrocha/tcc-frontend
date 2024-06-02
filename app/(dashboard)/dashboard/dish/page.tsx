@@ -64,10 +64,7 @@ const Page = ({ searchParams }: paramsProps) => {
         <BreadCrumb items={breadcrumbItems} />
 
         <div className="flex items-start justify-between">
-          <Heading
-            title={`Pratos (${totalItems})`}
-            // description="Manage items (Server side table functionalities.)"
-          />
+          <Heading title={`Pratos (${totalItems})`} description="" />
 
           <Link
             href={'/dashboard/dish/new'}
