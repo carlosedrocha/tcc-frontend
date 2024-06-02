@@ -90,10 +90,44 @@ export const users: User[] = [
     status: 'Active'
   }
 ];
-export type CategoryDish={
-  id:string,
-  name:string
+export type CategoryDish = {
+  id: string;
+  name: string;
+};
+
+export interface IDish {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  photoUrl: null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: null;
+  dishIngredients: DishIngredient[];
+  categories: Category[];
 }
+
+export interface ICategory {
+  id: string;
+  name: string;
+  description: null;
+  observation: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: null;
+}
+
+export interface IDishIngredient {
+  id: string;
+  quantity: number;
+  item: Item;
+}
+
+export interface Item {
+  name: string;
+}
+
 export type Employee = {
   id: number;
   first_name: string;
@@ -121,17 +155,18 @@ export const navItems: NavItem[] = [
     label: 'Dashboard'
   },
   {
-    title: 'Categoria de pratos',
-    href: '/dashboard/category-dish',
-    icon: 'sandwich',
-    label :'sandwich'
+    title: 'Prato',
+    href: '/dashboard/dish',
+    icon: 'dashboard',
+    label: 'dish'
   },
   {
     title: 'Categoria de pratos',
     href: '/dashboard/category-dish',
     icon: 'sandwich',
-    label :'sandwich'
+    label: 'sandwich'
   },
+
   {
     title: 'Funcionários',
     href: '/dashboard/employee',
