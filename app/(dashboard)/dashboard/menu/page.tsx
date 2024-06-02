@@ -24,11 +24,21 @@ import {
 } from '@/components/ui/accordion';
 import { MenuForm } from '@/components/forms/menu-form';
 import { Plus } from 'lucide-react';
+import api from '@/app/api';
+
+interface DishData {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  photoUrl: string | null;
+}
 
 interface MenuData {
   id: string;
   name: string;
   description: string;
+  dishes: DishData[];
 }
 
 export default function Page() {
@@ -39,22 +49,15 @@ export default function Page() {
   const [filter, setFilter] = useState('');
   const [openAccordions, setOpenAccordions] = useState<string[]>([]);
 
-  // Carregar dados salvos localmente ao iniciar
-  useEffect(() => {
-    const savedMenus = JSON.parse(localStorage.getItem('menus') || '[]');
-    setMenus(savedMenus);
-  }, []);
-
-  const handleAddMenu = () => {
-    const newMenu = {
-      id: String(Date.now()),
-      name: menuName,
-      description: menuDescription
-    };
-    const updatedMenus = [...menus, newMenu];
-    setMenus(updatedMenus);
-    localStorage.setItem('menus', JSON.stringify(updatedMenus));
+  const fetchMenu = async () => {
+    const response = await api.get('/menu');
+    setMenus(response.data); // Assuming response.data contains the menus with dishes
   };
+
+  // Carregar dados salvos ao iniciar
+  useEffect(() => {
+    fetchMenu();
+  }, []);
 
   const handleMenuNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMenuName(event.target.value);
@@ -74,15 +77,6 @@ export default function Page() {
     setShowModal(false);
   };
 
-  const handleConfirmAdd = () => {
-    if (menuName && menuDescription) {
-      handleAddMenu();
-      setMenuName(''); // Limpar campo de nome do cardápio
-      setMenuDescription(''); // Limpar campo de descrição do cardápio
-      handleCloseModal();
-    }
-  };
-
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);
   };
@@ -94,6 +88,12 @@ export default function Page() {
         : [...openAccordions, id]
     );
   };
+
+  const filteredMenus = menus.filter(
+    (menu) =>
+      menu.name.toLowerCase().includes(filter.toLowerCase()) ||
+      menu.description.toLowerCase().includes(filter.toLowerCase())
+  );
 
   return (
     <ScrollArea className="h-full">
@@ -120,28 +120,34 @@ export default function Page() {
         </div>
         <div className="flex-1 overflow-y-auto">
           <Accordion type="multiple">
-            {menus.map((menu) => (
+            {filteredMenus.map((menu) => (
               <AccordionItem key={menu.id} value={menu.id}>
                 <AccordionTrigger onClick={() => toggleAccordion(menu.id)}>
                   {menu.name}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <Card className="w-full">
-                    <CardHeader>
-                      <CardTitle>{menu.name}</CardTitle>
-                      <CardDescription>
-                        Descrição: {menu.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Link
-                        href=""
-                        className={cn(buttonVariants({ variant: 'default' }))}
-                      >
-                        Ver mais detalhes
-                      </Link>
-                    </CardContent>
-                  </Card>
+                  {menu.dishes.map((dish) => (
+                    <Card key={dish.id} className="mb-4 w-full">
+                      {dish.photoUrl && (
+                        <img src={dish.photoUrl} alt={dish.name} />
+                      )}
+                      <CardHeader>
+                        <CardTitle>{dish.name}</CardTitle>
+                        <CardDescription>
+                          Descrição: {dish.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p>
+                          Preço:{' '}
+                          {dish.price.toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                          })}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </AccordionContent>
               </AccordionItem>
             ))}

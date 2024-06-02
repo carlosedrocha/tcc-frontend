@@ -59,8 +59,10 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
     }
   }, [params, name, initialData]);
 
-  const title = initialData ? 'Editar Item' : 'Criar Item';
-  const description = initialData ? 'Editar Item' : 'Adicionar novo Item';
+  const title = initialData ? 'Editar Cardápio' : 'Criar Cardápio';
+  const description = initialData
+    ? 'Editar Cardápio'
+    : 'Adicionar novo Cardápio';
   const toastMessage = initialData ? 'Atualizado' : 'Criado';
   const action = initialData ? 'Salvar' : 'Criar';
   const [dishes, setDishes] = useState([]);
