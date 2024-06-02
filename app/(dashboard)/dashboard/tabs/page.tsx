@@ -1,8 +1,14 @@
-'use client'
+'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Modal } from '@/components/ui/modal';
@@ -28,12 +34,12 @@ export default function Page() {
   const { toast } = useToast();
   const router = useRouter();
   const [comandNumber, setComandNumber] = useState('');
-  const [savedCards, setSavedCards] = useState<TabCardData[]>([]);
-  const [filter, setFilter] = useState('');
   const [cpf, setCpf] = useState('');
   const [tabs, setTabs] = useState<TabCardData[]>([]);
+  const [filter, setFilter] = useState('');
   const [open, setOpen] = useState(false);
   const [idFinish, setIdFinish] = useState('');
+
   useEffect(() => {
     fetchTab();
   }, []);
@@ -45,12 +51,12 @@ export default function Page() {
         id: tab.id,
         number: tab.tabNumber.toString(),
         name: tab.entity.firstName,
-        status: tab.status,
+        status: tab.status
       }));
 
       // Ordenar as comandas abertas antes das fechadas
-      const openTabs = tabsData.filter(tab => tab.status === 'OPEN');
-      const closedTabs = tabsData.filter(tab => tab.status === 'CLOSED');
+      const openTabs = tabsData.filter((tab) => tab.status === 'OPEN');
+      const closedTabs = tabsData.filter((tab) => tab.status === 'CLOSED');
       const sortedTabs = [...openTabs, ...closedTabs];
 
       setTabs(sortedTabs);
@@ -61,8 +67,8 @@ export default function Page() {
 
   const handleAddCard = (id: string, status: string) => {
     const newCard = { id, number: comandNumber, name, status };
-    const updatedCards = [...savedCards, newCard];
-    setSavedCards(updatedCards);
+    const updatedCards = [...tabs, newCard];
+    setTabs(updatedCards);
   };
 
   const handleComandNumber = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +88,10 @@ export default function Page() {
 
     // Calcular dígitos verificadores
     const calcDigit = (cpfArray: number[], factor: number) => {
-      const sum = cpfArray.reduce((acc, digit, index) => acc + digit * (factor - index), 0);
+      const sum = cpfArray.reduce(
+        (acc, digit, index) => acc + digit * (factor - index),
+        0
+      );
       const remainder = sum % 11;
       return remainder < 2 ? 0 : 11 - remainder;
     };
@@ -112,7 +121,7 @@ export default function Page() {
       toast({
         variant: 'destructive',
         title: 'CPF do cliente não é valido.',
-        description: 'Tente novamente registrar sua comanda',
+        description: 'Tente novamente registrar sua comanda'
       });
     } else {
       if (comandNumber && name) {
@@ -123,84 +132,79 @@ export default function Page() {
             entity: {
               firstName: name,
               lastName: '',
-              cpf,
-            },
+              cpf
+            }
           });
           if (response.status === 201) {
             handleAddCard(response.data.tab.id, response.data.tab.status);
             setComandNumber(''); // Limpar campo de número da comanda
-            setName('');  // Limpar campo de nome
-            fetchTab()
+            setName(''); // Limpar campo de nome
+            fetchTab();
             handleCloseModal();
           } else {
             toast({
               title: 'Erro ao registrar comanda',
-              description: 'Ocorreu um erro ao tentar registrar a comanda.',
+              description: 'Ocorreu um erro ao tentar registrar a comanda.'
             });
           }
         } catch (error) {
           console.error('Erro ao registrar comanda:', error);
           toast({
             title: 'Erro ao registrar comanda',
-            description: 'Ocorreu um erro ao tentar registrar a comanda.',
+            description: 'Ocorreu um erro ao tentar registrar a comanda.'
           });
         }
       }
     }
   };
 
-  const finishTab = async () =>{
-    try{
-      setOpen(false)
-      try{
+  const finishTab = async () => {
+    try {
+      setOpen(false);
+      try {
         const response = await api.put(`/tab/close/${idFinish}`);
-        if(response.status===200){
-          console.log('oi')
+        if (response.status === 200) {
           reloadPage();
         }
-      }catch(error){
+      } catch (error) {
         toast({
           title: 'Erro ao finalizar comanda',
-          description: 'Ocorreu um erro ao tentar finalizar a comanda.',
+          description: 'Ocorreu um erro ao tentar finalizar a comanda.'
         });
       }
       fetchTab();
-    }
-    catch(error){
+    } catch (error) {}
+  };
 
-    }
-  }
-
-  const handleFinishTab = (id:string) =>{
+  const handleFinishTab = (id: string) => {
     setIdFinish(id);
     setOpen(true);
-  }
+  };
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);
-    // Atualizar os cards filtrados com base nos dados originais em tabs
-    const filteredCards = tabs.filter(
-      (card) =>
-        card.number.toLowerCase().includes(event.target.value.toLowerCase()) ||
-        card.name.toLowerCase().includes(event.target.value.toLowerCase())
-    );
-    setSavedCards(filteredCards);
   };
 
-  function reloadPage(){
+  const filteredTabs = tabs.filter(
+    (tab) =>
+      tab.number.toLowerCase().includes(filter.toLowerCase()) ||
+      tab.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  function reloadPage() {
     router.refresh();
     router.push(`/dashboard/tabs`);
-}
+  }
 
   return (
     <>
-     <AlertModal
+      <AlertModal
         isOpen={open}
         onClose={() => setOpen(false)}
         onConfirm={finishTab}
         loading={false}
       />
-    <ScrollArea className="h-full">
+      <ScrollArea className="h-full">
         <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
           <div className="flex items-start justify-between">
             <Heading
@@ -217,20 +221,18 @@ export default function Page() {
               className="w-full md:max-w-sm"
             />
           </div>
-          <div className="flex flex-wrap gap-4 mt-4">
-            {tabs.map((card) => (
-              <Card key={card.id} className="w-[350px]">
+          <div className="mt-4 flex flex-wrap gap-4">
+            {filteredTabs.map((tab) => (
+              <Card key={tab.id} className="w-[350px]">
                 <CardHeader>
-                  <CardTitle>Comanda Nº {card.number}</CardTitle>
+                  <CardTitle>Comanda Nº {tab.number}</CardTitle>
+                  <CardDescription>Nome: {tab.name}</CardDescription>
                   <CardDescription>
-                    Nome: {card.name}
-                  </CardDescription>
-                  <CardDescription>
-                    Status: {card.status === 'OPEN' ? 'ABERTA' : 'FECHADA'}
+                    Status: {tab.status === 'OPEN' ? 'ABERTA' : 'FECHADA'}
                     <span
                       className={cn(
-                        'inline-block w-2 h-2 ml-2 rounded-full',
-                        card.status === 'OPEN' ? 'bg-green-500' : 'bg-red-500'
+                        'ml-2 inline-block h-2 w-2 rounded-full',
+                        tab.status === 'OPEN' ? 'bg-green-500' : 'bg-red-500'
                       )}
                     ></span>
                   </CardDescription>
@@ -242,64 +244,55 @@ export default function Page() {
                   >
                     Acessar pedido
                   </Link>
-                 {
-                  card.status==="OPEN" &&(
-                    <Button 
-                    className='ml-10'
-                    variant="destructive"
-                    onClick={()=>{handleFinishTab(card.id)}}
-                  >
-                    Finalizar
-                  </Button>
-                  )
-                 }
+                  {tab.status === 'OPEN' && (
+                    <Button
+                      className="ml-10"
+                      variant="destructive"
+                      onClick={() => handleFinishTab(tab.id)}
+                    >
+                      Finalizar
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
           </div>
-          {/* Modal para adicionar nova comanda... */}
-          {showModal && (
-            <Modal
-              title="Adicionar Nova Comanda"
-              description="Preencha os campos abaixo para adicionar uma nova comanda."
-              isOpen={showModal}
-              onClose={handleCloseModal}
-            >
-              <div className="flex flex-col space-y-4">
-                <div className="flex flex-col space-y-1.5">
-                  <Label>Digite o número da comanda</Label>
-                  <Input
-                    type="text"
-                    value={comandNumber}
-                    onChange={handleComandNumber}
-                  />
-                </div>
-                <div className="flex flex-col space-y-1.5">
-                  <Label>Digite o nome do cliente</Label>
-                  <Input
-                    type="text"
-                    value={name}
-                    onChange={ handleNameChange}
-                  />
-                </div>
-                <div className="flex flex-col space-y-1.5">
-                  <Label>Digite o CPF do cliente</Label>
-                  <Input
-                    type="text"
-                    onChange={handleCpfChange}
-                  />
-                </div>
-                <div className="flex space-x-4">
-                  <Button onClick={handleConfirmAdd}>Adicionar</Button>
-                  <Button variant="outline" onClick={handleCloseModal}>
-                    Cancelar
-                  </Button>
-                </div>
-              </div>
-            </Modal>
-          )}
         </div>
       </ScrollArea>
+
+      {showModal && (
+        <Modal
+          title="Adicionar Nova Comanda"
+          description="Preencha os campos abaixo para adicionar uma nova comanda."
+          isOpen={showModal}
+          onClose={handleCloseModal}
+        >
+          <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label>Digite o número da comanda</Label>
+              <Input
+                type="text"
+                value={comandNumber}
+                onChange={handleComandNumber}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label>Digite o nome do cliente</Label>
+              <Input type="text" value={name} onChange={handleNameChange} />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label>Digite o CPF do cliente</Label>
+              <Input type="text" onChange={handleCpfChange} />
+            </div>
+            <div className="flex space-x-4">
+              <Button onClick={handleConfirmAdd}>Adicionar</Button>
+              <Button variant="outline" onClick={handleCloseModal}>
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   );
 }

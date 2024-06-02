@@ -31,24 +31,27 @@ import FileUpload from '../file-upload';
 import { useToast } from '../ui/use-toast';
 import { Textarea } from '../ui/textarea';
 
-
 const formSchema = z.object({
   name: z
     .string()
     .min(3, { message: 'O nome do item precisa ter no mínimo 3 caracteres' }),
   description: z.string().min(0, { message: '' }),
-  measurementUnit: z.string().min(1, { message: 'Unidade de medida é obrigatória' }),
+  measurementUnit: z
+    .string()
+    .min(1, { message: 'Unidade de medida é obrigatória' }),
   measurementUnitValue: z
     .string()
     .min(1, { message: 'Unidade de medida é obrigatória' })
-    .refine(value => numericPattern.test(value), {
-        message: 'Por favor, insira apenas números ou números com ponto ou vírgula.'
+    .refine((value) => numericPattern.test(value), {
+      message:
+        'Por favor, insira apenas números ou números com ponto ou vírgula.'
     }),
   price: z
     .string()
     .min(1, { message: 'Custo é obrigatório' })
-    .refine(value => numericPattern.test(value), {
-        message: 'Por favor, insira apenas números ou números com ponto ou vírgula.'
+    .refine((value) => numericPattern.test(value), {
+      message:
+        'Por favor, insira apenas números ou números com ponto ou vírgula.'
     }),
   typeId: z.string().min(1, { message: 'Por favor selecione uma categoria' })
 });
@@ -59,101 +62,105 @@ interface ItemForm {
   initialData: any | null;
 }
 
-export const ItemForm: React.FC<ItemForm> = ({
-  initialData,
-}) => {
+export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
   const urlId = params['itemId'];
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const title = urlId!="new" ? 'Editar Item' : 'Cadastrar Item';
-  const description = urlId!="new" ? 'Editar o Item' : 'Adicionar novo item';
-  const toastMessage = urlId!="new" ? 'Item atualizado com sucesso' : 'Item cadastrado com sucesso';
-  const action = urlId!="new" ? 'Salvar alterações' : 'Cadastrar';
+  const title = urlId != 'new' ? 'Editar Item' : 'Cadastrar Item';
+  const description = urlId != 'new' ? 'Editar o Item' : 'Adicionar novo item';
+  const toastMessage =
+    urlId != 'new'
+      ? 'Item atualizado com sucesso'
+      : 'Item cadastrado com sucesso';
+  const action = urlId != 'new' ? 'Salvar alterações' : 'Cadastrar';
   const [itemsType, setitemsType] = useState([]);
- 
-  const defaultValues =// = urlId!="new" ? {} : 
+
+  const defaultValues =
+    // = urlId!="new" ? {} :
     {
-        name: '',
-        description: '',
-        measurementUnit: '',
-        measurementUnitValue:'',
-        price: '',
-        typeId:'',
-        itemType: []
-    }
+      name: '',
+      description: '',
+      measurementUnit: '',
+      measurementUnitValue: '',
+      price: '',
+      typeId: '',
+      itemType: []
+    };
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues
   });
 
-  useEffect(()=>{
-    const fetchItemType = async ()=>{
-      try{
+  useEffect(() => {
+    const fetchItemType = async () => {
+      try {
         const response = await api.get('item-type');
         setitemsType(response.data);
-      }catch(error){
+      } catch (error) {
         toast({
           variant: 'destructive',
           title: 'Não foi possível buscar tipos de item.',
-          description: 'Tivemos problemas ao buscar os tipos de item, tente novamente mais tarde.'
+          description:
+            'Tivemos problemas ao buscar os tipos de item, tente novamente mais tarde.'
         });
       }
-    }
+    };
     fetchItemType();
-  },[])
+  }, []);
 
-  function reloadPage(){
-      router.refresh();
-      router.push(`/dashboard/item`);
+  function reloadPage() {
+    router.refresh();
+    router.push(`/dashboard/item`);
   }
   const onSubmit = async (data: ProductFormValues) => {
-
-
     try {
-        const fomatedData= {
-            name: data.name,
-            description: data.description,
-            measurementUnit:  data.measurementUnit,
-            measurementUnitValue: parseFloat(data.measurementUnitValue.replace(',','.')),
-            cost: parseFloat(data.price.replace(',','.')),
-            typeId: data.typeId
-        }
-        console.log(fomatedData)
+      const fomatedData = {
+        name: data.name,
+        description: data.description,
+        measurementUnit: data.measurementUnit,
+        measurementUnitValue: parseFloat(
+          data.measurementUnitValue.replace(',', '.')
+        ),
+        cost: parseFloat(data.price.replace(',', '.')),
+        typeId: data.typeId
+      };
+      console.log(fomatedData);
       setLoading(true);
-      try{
-      if (urlId!="new") {
-         const response = await api.put(`/item/${urlId}`,fomatedData);
-         if(response.status === 200){
+      try {
+        if (urlId != 'new') {
+          const response = await api.put(`/item/${urlId}`, fomatedData);
+          if (response.status === 200) {
             toast({
-                variant: 'destructive',
-                title: "Alteração relizada com sucesso",
-                description: 'Item foi atualizado com sucesso.'
-              });
-       
-            reloadPage();
-         }
-      } else {
-        const response = await api.post(`/item`,fomatedData);
-        if(response.status === 201){
-           toast({
-               variant: 'destructive',
-               title: "Alteração relizada com sucesso",
-               description: 'Item foi atualizado com sucesso.'
-             });
+              variant: 'destructive',
+              title: 'Alteração relizada com sucesso',
+              description: 'Item foi atualizado com sucesso.'
+            });
 
-           reloadPage();
+            reloadPage();
+          }
+        } else {
+          const response = await api.post(`/item`, fomatedData);
+          if (response.status === 201) {
+            toast({
+              variant: 'destructive',
+              title: 'Cadastro relizado com sucesso',
+              description: 'Item foi cadastrado com sucesso.'
+            });
+
+            reloadPage();
+          }
         }
-      }}catch(error){
-        console.log(error)
+      } catch (error) {
+        console.log(error);
         toast({
-            variant: 'destructive',
-            title: "Erro ao salvar o item",
-            description: 'Tente novamente mais tarde.'
-          });
+          variant: 'destructive',
+          title: 'Erro ao salvar o item',
+          description: 'Tente novamente mais tarde.'
+        });
       }
     } catch (error: any) {
       toast({
@@ -170,7 +177,7 @@ export const ItemForm: React.FC<ItemForm> = ({
     try {
       setLoading(true);
       //   await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
-        reloadPage();
+      reloadPage();
     } catch (error: any) {
     } finally {
       setLoading(false);
@@ -223,7 +230,7 @@ export const ItemForm: React.FC<ItemForm> = ({
                 </FormItem>
               )}
             />
-                        <FormField
+            <FormField
               control={form.control}
               name="typeId"
               render={({ field }) => (
@@ -243,11 +250,11 @@ export const ItemForm: React.FC<ItemForm> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                    {itemsType.map((itemType) => (
+                      {itemsType.map((itemType) => (
                         <SelectItem key={itemType.id} value={itemType.id}>
-                        {itemType.name}
+                          {itemType.name}
                         </SelectItem>
-                    ))}
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -256,24 +263,24 @@ export const ItemForm: React.FC<ItemForm> = ({
             />
           </div>
           <div className="gap-8 md:grid md:grid-cols-3">
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
                 <FormItem>
-                <FormLabel>Preço</FormLabel>
-                <FormControl>
+                  <FormLabel>Preço</FormLabel>
+                  <FormControl>
                     <Input
-                    type="text"
-                    disabled={loading}
-                    placeholder="R$: 35,00"
-                    value={field.value ?? ''} // Usando o operador de coalescência nula para garantir que o valor seja definido
-                    onChange={field.onChange} // Passando a função onChange diretamente
+                      type="text"
+                      disabled={loading}
+                      placeholder="R$: 35,00"
+                      value={field.value ?? ''} // Usando o operador de coalescência nula para garantir que o valor seja definido
+                      onChange={field.onChange} // Passando a função onChange diretamente
                     />
-                </FormControl>
-                <FormMessage />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
-            )}
+              )}
             />
             <FormField
               control={form.control}
@@ -313,7 +320,7 @@ export const ItemForm: React.FC<ItemForm> = ({
             />
           </div>
           <div className="gap-8 md:grid md:grid-cols-2">
-          <FormField
+            <FormField
               control={form.control}
               name="description"
               render={({ field }) => (

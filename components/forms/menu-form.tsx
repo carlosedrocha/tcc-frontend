@@ -63,7 +63,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
   const description = initialData ? 'Editar Item' : 'Adicionar novo Item';
   const toastMessage = initialData ? 'Atualizado' : 'Criado';
   const action = initialData ? 'Salvar' : 'Criar';
-  const [dishes, setDisehs] = useState([]);
+  const [dishes, setDishes] = useState([]);
   const fetchDishes = async () => {
     try {
       const response = await api.get('/dish');
@@ -72,6 +72,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
           id: dish.id,
           name: dish.name
         }));
+        setDishes(formattedData);
       }
     } catch (error) {
       console.error(error);
@@ -93,28 +94,14 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
 
   const onSubmit = async (data: MenuFormValues) => {
     try {
-      setLoading(true);
-      if (initialData) {
-        await api.put(`item-type/${initialData.id}`, data);
-      } else {
-        const res = await api.post(`/item-type`, data);
-        console.log(res);
+      const response = await api.post('menu', {
+        name: data.name,
+        description: data.description,
+        dishIds: data.dishesId
+      });
+      if (response.status === 201) {
       }
-      router.refresh();
-      router.push(`/dashboard/item-type`);
-      toast({
-        title: 'Successo',
-        description: toastMessage
-      });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.'
-      });
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) {}
   };
 
   const onDelete = async () => {
@@ -191,20 +178,19 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
               </FormItem>
             )}
           />
-          {/* <FormField
+          <FormField
             control={form.control}
             name="dishesId"
             render={({ field }) => (
               <DishesSelect
-                categories={null}
+                dishes={dishes}
                 value={field.value}
                 onValueChange={(value) => {
-                  console.log(value);
                   field.onChange(value);
                 }}
               />
             )}
-          /> */}
+          />
           <Button disabled={loading} className="ml-auto" type="submit">
             {action}
           </Button>

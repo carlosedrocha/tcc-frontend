@@ -90,12 +90,12 @@ export const users: User[] = [
     status: 'Active'
   }
 ];
-export type CategoryDish={
-  id:string,
-  name:string
-} 
-export type Item={
-  id:string;
+export type CategoryDish = {
+  id: string;
+  name: string;
+};
+export type Item = {
+  id: string;
   name: string;
   description: string;
   measurementUnit: string;
@@ -103,7 +103,7 @@ export type Item={
   cost: number;
   typeId: string;
   typeName: string;
-}
+};
 export type Employee = {
   id: number;
   first_name: string;
@@ -126,7 +126,6 @@ export type Employee = {
 //Utilizar em regex de inputs para aceitar somente numero
 export const numericPattern = /^[0-9]+([,.][0-9]+)?$/;
 
-
 export const navItems: NavItem[] = [
   {
     title: 'Inicio',
@@ -141,28 +140,28 @@ export const navItems: NavItem[] = [
     label: 'item-type'
   },
   {
-    title: 'Cadastro de Item',
+    title: 'Item',
     href: '/dashboard/item',
     icon: 'sandwich',
-    label :'sandwich'
+    label: 'sandwich'
   },
   {
     title: 'Categoria de pratos',
     href: '/dashboard/category-dish',
     icon: 'sandwich',
-    label :'sandwich'
+    label: 'sandwich'
   },
   {
     title: 'Cardapio',
     href: '/dashboard/menu',
     icon: 'menu',
-    label :'sandwich'
+    label: 'sandwich'
   },
   {
-    title:'Comandas',
-    href:'/dashboard/tabs',
-    icon:'tab',
-    label:'tab'
+    title: 'Comandas',
+    href: '/dashboard/tabs',
+    icon: 'tab',
+    label: 'tab'
   },
   {
     title: 'Mudar ',

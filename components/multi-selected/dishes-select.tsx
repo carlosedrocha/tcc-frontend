@@ -4,48 +4,74 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { CaretSortIcon } from '@radix-ui/react-icons';
-import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
 
 type Dishes = {
   id: string;
   name: string;
 };
 
-type DishesSelectSelectProps = {
+type DishesSelectProps = {
   dishes: Dishes[];
   value?: string[];
   onValueChange?: (value: string[]) => void;
 };
 
-export function DishesSelect({ dishes, value, onValueChange }: DishesSelectSelectProps) {
+export function DishesSelect({
+  dishes,
+  value,
+  onValueChange
+}: DishesSelectProps) {
   const [internalValue, setInternalValue] = useState<string[]>([]);
+  const [selectedNames, setSelectedNames] = useState<string[]>([]);
 
-  const handleItemClick = (categoryId: string) => {
-    const newValue = selectedValues.includes(categoryId)
-      ? selectedValues.filter((id) => id !== categoryId)
-      : [...selectedValues, categoryId];
+  const handleItemClick = (dishId: string) => {
+    const newValue = selectedValues.includes(dishId)
+      ? selectedValues.filter((id) => id !== dishId)
+      : [...selectedValues, dishId];
     if (onValueChange) {
       onValueChange(newValue);
     } else {
       setInternalValue(newValue);
     }
+
+    const newNames = selectedValues.includes(dishId)
+      ? selectedNames.filter(
+          (name) => name !== dishes.find((dish) => dish.id === dishId)?.name
+        )
+      : [
+          ...selectedNames,
+          dishes.find((dish) => dish.id === dishId)?.name || ''
+        ];
+
+    setSelectedNames(newNames);
   };
 
-  const selectedValues = useMemo(() => (value !== undefined ? value : internalValue), [value, internalValue]);
+  const selectedValues = useMemo(
+    () => (value !== undefined ? value : internalValue),
+    [value, internalValue]
+  );
 
   return (
     <FormField
-      name="categoriesIds"
+      name="dishesIds"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Pratos</FormLabel>
+          <FormLabel className="mr-4">Pratos</FormLabel>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="justify-between">
-                Selecione
+                {selectedNames.length > 0
+                  ? selectedNames.join(', ')
+                  : 'Selecione'}
                 <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
@@ -55,7 +81,6 @@ export function DishesSelect({ dishes, value, onValueChange }: DishesSelectSelec
                   key={dish.id}
                   checked={selectedValues.includes(dish.id)}
                   onCheckedChange={() => handleItemClick(dish.id)}
-                  onSelect={(e) => e.preventDefault()}
                 >
                   {dish.name}
                 </DropdownMenuCheckboxItem>
