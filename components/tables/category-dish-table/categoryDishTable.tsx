@@ -41,7 +41,7 @@ export function CategoryDishTable<TData, TValue>({
   return (
     <>
       <Input
-        placeholder={`Search ${searchKey}...`}
+        placeholder={`Pesquise pelo nome ${searchKey}...`}
         value={searchValue}
         onChange={(event) => setSearchValue(event.target.value)}
         className="w-full md:max-w-sm"
@@ -90,8 +90,8 @@ export function CategoryDishTable<TData, TValue>({
       <div className="flex flex-col items-center justify-end gap-2 space-x-2 py-4 sm:flex-row">
         <div className="flex w-full items-center justify-between">
           <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{' '}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+            {table.getFilteredSelectedRowModel().rows.length} de{' '}
+            {table.getFilteredRowModel().rows.length} Linhas(s) Selcionada(s).
           </div>
         </div>
       </div>

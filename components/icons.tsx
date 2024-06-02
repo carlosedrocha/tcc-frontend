@@ -30,6 +30,7 @@ import {
   Twitter,
   User,
   User2Icon,
+  Tag,
   UserX2Icon,
   X
 } from 'lucide-react';
@@ -51,7 +52,8 @@ export const Icons = {
   trash: Trash,
   employee: UserX2Icon,
   post: FileText,
-  tab:MenuSquare,
+  menu:MenuSquare,
+  tab:Tag,
   page: File,
   media: Image,
   settings: Settings,

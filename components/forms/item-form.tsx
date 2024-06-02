@@ -107,7 +107,6 @@ export const ItemForm: React.FC<ItemForm> = ({
   },[])
 
   function reloadPage(){
-    console.log('oi')
       router.refresh();
       router.push(`/dashboard/item`);
   }

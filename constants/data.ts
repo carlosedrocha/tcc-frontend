@@ -153,6 +153,12 @@ export const navItems: NavItem[] = [
     label :'sandwich'
   },
   {
+    title: 'Cardapio',
+    href: '/dashboard/menu',
+    icon: 'menu',
+    label :'sandwich'
+  },
+  {
     title:'Comandas',
     href:'/dashboard/tabs',
     icon:'tab',

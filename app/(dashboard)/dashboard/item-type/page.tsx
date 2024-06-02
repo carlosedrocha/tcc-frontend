@@ -65,8 +65,8 @@ const Page = ({ searchParams }: paramsProps) => {
 
         <div className="flex items-start justify-between">
           <Heading
-            title={`Itens (${totalItems})`}
-            description="Manage items (Server side table functionalities.)"
+            title={`Tipos de item (${totalItems})`}
+            description="Gerencie seus tipos de Item"
           />
 
           <Link
