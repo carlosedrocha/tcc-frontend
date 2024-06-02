@@ -37,6 +37,7 @@ api.interceptors.request.use(async (config: any) => {
 
   return newConfig;
 });
+
 api.interceptors.response.use(
   response => response,
   error => {
@@ -49,5 +50,6 @@ api.interceptors.response.use(
     // return Promise.reject(error);
   }
 );
+
 //module.exports = api;
 export default api;

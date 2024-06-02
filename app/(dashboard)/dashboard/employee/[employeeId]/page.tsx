@@ -4,8 +4,8 @@ import { ProductForm } from '@/components/forms/product-form';
 //todo backend integration
 export default function Page() {
   const breadcrumbItems = [
-    { title: 'Employee', link: '/dashboard/employee' },
-    { title: 'Create', link: '/dashboard/employee/create' }
+    { title: 'Funcionários', link: '/dashboard/employee' },
+    { title: 'Criar', link: '/dashboard/employee/create' }
   ];
   return (
     <div className="flex-1 space-y-4 p-8">

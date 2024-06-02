@@ -1,5 +1,4 @@
-import { Icons } from '@/components/icons';
-import { NavItem, SidebarNavItem } from '@/types';
+import { NavItem } from '@/types';
 
 export type User = {
   id: number;
@@ -91,10 +90,44 @@ export const users: User[] = [
     status: 'Active'
   }
 ];
-export type CategoryDish={
-  id:string,
-  name:string
+export type CategoryDish = {
+  id: string;
+  name: string;
+};
+
+export interface IDish {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  photoUrl: null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: null;
+  dishIngredients: DishIngredient[];
+  categories: Category[];
 }
+
+export interface ICategory {
+  id: string;
+  name: string;
+  description: null;
+  observation: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: null;
+}
+
+export interface IDishIngredient {
+  id: string;
+  quantity: number;
+  item: Item;
+}
+
+export interface Item {
+  name: string;
+}
+
 export type Employee = {
   id: number;
   first_name: string;
@@ -122,25 +155,38 @@ export const navItems: NavItem[] = [
     label: 'Dashboard'
   },
   {
+    title: 'Prato',
+    href: '/dashboard/dish',
+    icon: 'dashboard',
+    label: 'dish'
+  },
+  {
     title: 'Categoria de pratos',
     href: '/dashboard/category-dish',
     icon: 'sandwich',
-    label :'sandwich'
+    label: 'sandwich'
   },
+
   {
-    title: 'User',
-    href: '/dashboard/user',
+    title: 'Funcionários',
+    href: '/dashboard/employee',
     icon: 'user',
     label: 'user'
   },
   {
-    title: 'Employee',
+    title: 'Mudar ',
     href: '/dashboard/employee',
     icon: 'employee',
     label: 'employee'
   },
   {
-    title: 'Profile',
+    title: 'Tipo de Item',
+    href: '/dashboard/item-type',
+    icon: 'employee',
+    label: 'item-type'
+  },
+  {
+    title: 'Mudar o',
     href: '/dashboard/profile',
     icon: 'profile',
     label: 'profile'
@@ -156,5 +202,18 @@ export const navItems: NavItem[] = [
     href: '/',
     icon: 'login',
     label: 'login'
+  }
+];
+
+export type ItemTypeT = {
+  name: string;
+};
+
+export const itemTypes: ItemTypeT[] = [
+  {
+    name: 'tipo de item 1'
+  },
+  {
+    name: 'tipo de item 2'
   }
 ];
