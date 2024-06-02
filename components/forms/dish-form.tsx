@@ -88,10 +88,19 @@ export const DishForm: React.FC<DishFormProps> = ({
   const [items, setItems] = useState<any[]>([]);
 
   let id: string | null | string[] = params['dishId'];
+  const changeNewToNullId = () => {
+    if (id === 'new') {
+      id = null;
+    };
+  };
+  changeNewToNullId();
   let currentDish: IDish | null = null;
   useEffect(() => {
     const fetchCurrentDish = async () => {
       try {
+        if (!id) {
+          return;
+        }
         const response = await api.get(`dish/${id}`);
         const data = response.data;
         currentDish = data;
