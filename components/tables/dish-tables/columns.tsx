@@ -8,6 +8,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { IDish } from '@/constants/data';
 import { ColumnDef } from '@tanstack/react-table';
+import Image from 'next/image';
 import { CellAction } from './cell-action';
 
 // Helper function to render object as children
@@ -79,11 +80,36 @@ export const columns: ColumnDef<IDish>[] = [
   },
   {
     accessorKey: 'price',
-    header: 'Preço'
+    header: 'Preço',
+    cell: ({ row }) => {
+      const price = row.original.price;
+      if (price === undefined || price === null) {
+        return '-';
+      }
+      return price.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+    }
   },
   {
     accessorKey: 'photoUrl',
-    header: 'IMAGEM'
+    header: 'IMAGEM',
+    cell: ({ row }) => {
+      const photoUrl = row.original.photoUrl;
+      if (!photoUrl) {
+        return null;
+      }
+      return (
+        <Image
+          src={photoUrl}
+          alt={`Imagem de ${row.original.name}`}
+          width={60} // Defina a largura explicitamente
+          height={60} // Você pode usar uma string ou número
+          // style={{ width: '100px', height: 'auto' }} // Ajuste o tamanho conforme necessário
+        />
+      );
+    }
   },
   {
     id: 'actions',

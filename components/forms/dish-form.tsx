@@ -72,7 +72,7 @@ interface DishFormProps {
   initialData: any | null;
   // categories: any;
 }
-
+// todo edit render previous image
 export const DishForm: React.FC<DishFormProps> = ({
   initialData
   // categories
@@ -403,11 +403,10 @@ export const DishForm: React.FC<DishFormProps> = ({
               </Button>
             </div>
           </div>
-          {/* aqui */}
-
-          <Button className="ml-auto" type="submit">
+          {/* aqui todo check why button*/ }
+          {/* <Button className="ml-auto" type="submit">
             {action}
-          </Button>
+          </Button> */}
           <Button
             className="ml-auto"
             type="submit"
