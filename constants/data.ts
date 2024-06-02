@@ -90,12 +90,8 @@ export const users: User[] = [
     status: 'Active'
   }
 ];
-export type CategoryDish={
-  id:string,
-  name:string
-} 
-export type Item={
-  id:string;
+export type Item = {
+  id: string;
   name: string;
   description: string;
   measurementUnit: string;
@@ -103,6 +99,8 @@ export type Item={
   cost: number;
   typeId: string;
   typeName: string;
+};
+
 export type CategoryDish = {
   id: string;
   name: string;
@@ -117,8 +115,8 @@ export interface IDish {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: null;
-  dishIngredients: DishIngredient[];
-  categories: Category[];
+  dishIngredients: IDishIngredient[];
+  categories: ICategory[];
 }
 
 export interface ICategory {
@@ -135,10 +133,6 @@ export interface IDishIngredient {
   id: string;
   quantity: number;
   item: Item;
-}
-
-export interface Item {
-  name: string;
 }
 
 export type Employee = {
@@ -163,7 +157,6 @@ export type Employee = {
 //Utilizar em regex de inputs para aceitar somente numero
 export const numericPattern = /^[0-9]+([,.][0-9]+)?$/;
 
-
 export const navItems: NavItem[] = [
   {
     title: 'Inicio',
@@ -181,11 +174,7 @@ export const navItems: NavItem[] = [
     title: 'Cadastro de Item',
     href: '/dashboard/item',
     icon: 'sandwich',
-    label :'sandwich'
-    title: 'Prato',
-    href: '/dashboard/dish',
-    icon: 'dashboard',
-    label: 'dish'
+    label: 'sandwich'
   },
   {
     title: 'Categoria de pratos',
@@ -198,13 +187,13 @@ export const navItems: NavItem[] = [
     title: 'Cardapio',
     href: '/dashboard/menu',
     icon: 'menu',
-    label :'sandwich'
+    label: 'sandwich'
   },
   {
-    title:'Comandas',
-    href:'/dashboard/tabs',
-    icon:'tab',
-    label:'tab'
+    title: 'Comandas',
+    href: '/dashboard/tabs',
+    icon: 'tab',
+    label: 'tab'
   },
   {
     title: 'Mudar ',
