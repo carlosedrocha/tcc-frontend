@@ -171,20 +171,25 @@ export const navItems: NavItem[] = [
     label: 'item-type'
   },
   {
-    title: 'Cadastro de Item',
+    title: 'Item',
     href: '/dashboard/item',
     icon: 'sandwich',
     label: 'sandwich'
   },
   {
-    title: 'Categoria de pratos',
+    title: 'Categoria de Pratos',
     href: '/dashboard/category-dish',
     icon: 'sandwich',
     label: 'sandwich'
   },
-
   {
-    title: 'Cardapio',
+    title: 'Pratos',
+    href: '/dashboard/dish',
+    icon: 'sandwich',
+    label: 'sandwich'
+  },
+  {
+    title: 'Cardápio',
     href: '/dashboard/menu',
     icon: 'menu',
     label: 'sandwich'
