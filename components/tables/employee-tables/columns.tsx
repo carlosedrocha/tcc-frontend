@@ -1,4 +1,5 @@
 'use client';
+import { translatedRolesEnum } from '@/components/forms/employee-form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Employee } from '@/constants/data';
 import { ColumnDef } from '@tanstack/react-table';
@@ -25,24 +26,28 @@ export const columns: ColumnDef<Employee>[] = [
     enableHiding: false
   },
   {
-    accessorKey: 'first_name',
-    header: 'NAME'
+    accessorKey: 'firstName',
+    header: 'NOME'
   },
-  {
-    accessorKey: 'country',
-    header: 'COUNTRY'
-  },
+  //TODO not accessing lastName properly
+  // {
+  //   accessorKey: 'lastName',
+  //   header: 'SOBRENOME'
+  // },
   {
     accessorKey: 'email',
     header: 'EMAIL'
   },
+
   {
-    accessorKey: 'job',
-    header: 'COMPANY'
+    accessorKey: 'cpf',
+    header: 'CPF'
   },
   {
-    accessorKey: 'gender',
-    header: 'GENDER'
+    accessorKey: 'role',
+    header: 'CARGO',
+    cell: ({ row }) =>
+      translatedRolesEnum[row.original.role] || row.original.role
   },
   {
     id: 'actions',

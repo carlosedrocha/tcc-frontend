@@ -201,17 +201,17 @@ export const navItems: NavItem[] = [
     label: 'tab'
   },
   {
-    title: 'Mudar ',
+    title: 'Funcionários',
     href: '/dashboard/employee',
     icon: 'employee',
     label: 'employee'
   },
-  {
-    title: 'Mudar o',
-    href: '/dashboard/profile',
-    icon: 'profile',
-    label: 'profile'
-  },
+  // {
+  //   title: 'Mudar o',
+  //   href: '/dashboard/profile',
+  //   icon: 'profile',
+  //   label: 'profile'
+  // },
   // {
   //   title: 'Kanban',
   //   href: '/dashboard/kanban',
