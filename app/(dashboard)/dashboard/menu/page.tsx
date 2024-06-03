@@ -151,9 +151,12 @@ export default function Page() {
     return total;
   };
 
+  const isValidOrder = (order) =>
+    order.dishesOrder.some((item) => item.deletedAt === null);
+
+  // Função para calcular o total de um pedido
   const calculateTotal = (order: any) => {
     let total = 0;
-
     order.dishesOrder.forEach((item: any) => {
       total += item.dish.price * item.quantity;
     });
@@ -195,15 +198,16 @@ export default function Page() {
       prevOrderCart.filter((_, i) => i !== index)
     );
   };
+
   const handleRemoveItemFromOrder = (orderIndex: number, dishIndex: number) => {
     const updatedOldOrders = [...oldOrders];
     const dishQuantity =
       updatedOldOrders[orderIndex].dishesOrder[dishIndex].quantity;
     if (dishQuantity > 0) {
       updatedOldOrders[orderIndex].dishesOrder[dishIndex].quantity -= 1;
+      setOldOrders(updatedOldOrders);
     }
-    setOldOrders(updatedOldOrders);
-    setShowUpdateButton(true);
+    setShowUpdateButton(true); // Mantenha o botão de "Alterar Pedido" visível
   };
 
   const filteredMenus = menus.filter(
@@ -255,11 +259,6 @@ export default function Page() {
       });
     }
   };
-
-  const hasValidDishes = (order) =>
-    order.dishesOrder.some(
-      (item) => item.quantity > 0 && item.deletedAt === null
-    );
 
   return (
     <>
@@ -382,7 +381,6 @@ export default function Page() {
               ))}
             </Accordion>
           </div>
-
           {tabId && orderCart.length > 0 && (
             <div style={{ marginTop: '80px' }}>
               <h2 className="text-2xl font-bold">Pedido Novo</h2>
@@ -432,77 +430,63 @@ export default function Page() {
               </div>
             </div>
           )}
-          <div className="flex-1 overflow-y-auto" style={{ marginTop: '60px' }}>
-            {oldOrders.map(
-              (order, orderIndex) =>
-                hasValidDishes(order) && (
-                  <div key={orderIndex} className="mt-10">
-                    <h2 className="text-2xl font-bold">
-                      Pedido {orderIndex + 1}
-                    </h2>
-                    {order.dishesOrder.map(
-                      (item, dishIndex) =>
-                        item.quantity > 0 &&
-                        item.deletedAt === null && (
-                          <li
-                            key={dishIndex}
-                            className="mb-4 mt-4 flex items-center justify-between border-b border-gray-100 pb-2"
-                          >
-                            <div>
-                              <h4 className="text-xl">{item.dish.name}</h4>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="mr-8">
-                                Quantidade: {item.quantity}
-                              </span>
-                              <span className="mr-8">
-                                Preço:{' '}
-                                {(
-                                  item.dish.price * item.quantity
-                                ).toLocaleString('pt-BR', {
-                                  style: 'currency',
-                                  currency: 'BRL'
-                                })}
-                              </span>
-                              <Button
-                                variant="destructive"
-                                onClick={() =>
-                                  handleRemoveItemFromOrder(
-                                    orderIndex,
-                                    dishIndex
-                                  )
-                                }
-                              >
-                                Excluir Item
-                              </Button>
-                            </div>
-                          </li>
-                        )
-                    )}
-                    {showUpdateButton && (
-                      <div className="flex justify-end">
-                        <Button
-                          onClick={() => {
-                            handlePutOldOrder(orderIndex);
-                          }}
+          {oldOrders.map(
+            (order, orderIndex) =>
+              isValidOrder(order) && (
+                <div key={orderIndex} className="mt-10">
+                  <h2 className="text-2xl font-bold">
+                    Pedido {orderIndex + 1}
+                  </h2>
+                  {order.dishesOrder.map(
+                    (item, dishIndex) =>
+                      item.quantity > 0 &&
+                      item.deletedAt === null && (
+                        <li
+                          key={dishIndex}
+                          className="mb-4 mt-4 flex items-center justify-between border-b border-gray-100 pb-2"
                         >
-                          Alterar Pedido
-                        </Button>
-                      </div>
-                    )}
-                    <div style={{ textAlign: 'right', marginTop: '20px' }}>
-                      <p>
-                        Total:{' '}
-                        {calculateTotal(order).toLocaleString('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL'
-                        })}
-                      </p>
+                          <div>
+                            <h4 className="text-xl">{item.dish.name}</h4>
+                            <p>Descrição: {item.dish.description}</p>
+                            <p>
+                              Preço:{' '}
+                              {item.dish.price.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL'
+                              })}
+                            </p>
+                          </div>
+                          <Button
+                            variant="destructive"
+                            onClick={() =>
+                              handleRemoveItemFromOrder(orderIndex, dishIndex)
+                            }
+                          >
+                            Excluir Item
+                          </Button>
+                        </li>
+                      )
+                  )}
+                  {/* Renderizar botão de "Alterar Pedido" apenas se houver pedidos válidos */}
+                  {isValidOrder(order) && (
+                    <div className="flex justify-end">
+                      <Button onClick={() => handlePutOldOrder(orderIndex)}>
+                        Alterar Pedido
+                      </Button>
                     </div>
+                  )}
+                  <div style={{ textAlign: 'right', marginTop: '20px' }}>
+                    <p>
+                      Total:{' '}
+                      {calculateTotal(order).toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                      })}
+                    </p>
                   </div>
-                )
-            )}
-          </div>
+                </div>
+              )
+          )}
         </div>
       </ScrollArea>
     </>
