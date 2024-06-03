@@ -44,7 +44,6 @@ const Page = ({ searchParams }: paramsProps) => {
           params: { offset, limit: pageLimit }
         });
 
-        console.log(response.data);
         setData(response.data);
         setPageCount(Math.ceil(response.data.total / pageLimit));
       } catch (error) {
@@ -56,7 +55,6 @@ const Page = ({ searchParams }: paramsProps) => {
   }, [page, pageLimit, offset]);
 
   const totalItems = data.length;
-  console.log(data);
 
   return (
     <>
@@ -64,10 +62,7 @@ const Page = ({ searchParams }: paramsProps) => {
         <BreadCrumb items={breadcrumbItems} />
 
         <div className="flex items-start justify-between">
-          <Heading
-            title={`Pratos (${totalItems})`}
-            // description="Manage items (Server side table functionalities.)"
-          />
+          <Heading title={`Pratos (${totalItems})`} description="" />
 
           <Link
             href={'/dashboard/dish/new'}

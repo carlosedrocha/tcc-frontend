@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Trash } from 'lucide-react';
-import { useParams, useRouter, useSearchParams  } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -24,7 +24,7 @@ export const IMG_MAX_LIMIT = 3;
 const formSchema = z.object({
   name: z
     .string()
-    .min(3, { message: 'Employee Name must be at least 3 characters' }),
+    .min(3, { message: 'Employee Name must be at least 3 characters' })
 });
 
 type CategoryDishFormValues = z.infer<typeof formSchema>;
@@ -32,90 +32,97 @@ interface CategoryDishFormProps {
   initialData: any | null;
 }
 
-
-export const CateroyDishForm : React.FC<CategoryDishFormProps> = ({ initialData }) => {
+export const CateroyDishForm: React.FC<CategoryDishFormProps> = ({
+  initialData
+}) => {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const name = searchParams.get('name');
   const { toast } = useToast();
-  
-  initialData =params['category-dishId']!=="new" ?{
-    id: params['category-dishId'],
-    name: name,
-  }:null
-  console.log(initialData)
+
+  initialData =
+    params['category-dishId'] !== 'new'
+      ? {
+          id: params['category-dishId'],
+          name: name
+        }
+      : null;
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const title = initialData ? 'Editar Categoria do prato' : 'Cadastrar Categoria do prato';
-  const description = initialData ? 'Editar Categoria do prato.' : 'Cadastrar Nova Categoria do prato';
-  const toastMessage = initialData ? 'Categoria de prato atualizada.' : 'Categoria de prato Adicionado.';
+  const title = initialData
+    ? 'Editar Categoria do prato'
+    : 'Cadastrar Categoria do prato';
+  const description = initialData
+    ? 'Editar Categoria do prato.'
+    : 'Cadastrar Nova Categoria do prato';
+  const toastMessage = initialData
+    ? 'Categoria de prato atualizada.'
+    : 'Categoria de prato Adicionado.';
   const action = initialData ? 'Salvar alterações' : 'Cadastrar';
 
   const defaultValues = initialData
     ? initialData
     : {
-        name: '',
+        name: ''
       };
-// console.log(defaultValues)
+  // console.log(defaultValues)
   const form = useForm<CategoryDishFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues
   });
-  const reloadPage = ()=>{
+  const reloadPage = () => {
     router.refresh();
     router.push(`/dashboard/category-dish`);
-  }
+  };
   const onSubmit = async (data: CategoryDishFormValues) => {
-
     try {
       setLoading(true);
       if (initialData) {
-        try{
-          const res = await api.put(`/category/${initialData.id}`,data);
-          if(res.status===200){
+        try {
+          const res = await api.put(`/category/${initialData.id}`, data);
+          if (res.status === 200) {
             toast({
-              variant: 'destructive',
+              variant: 'primary',
               title: 'Cadastrado com sucesso.',
               description: 'Categoria do prato AtualIzado com sucesso.'
             });
             reloadPage();
           }
-         
-        }catch(error){
+        } catch (error) {
           toast({
             variant: 'destructive',
             title: 'Erro ao atualizar',
-            description: 'Ops. Tivemos um problema ao salvar a categoria do prato, tente novamente mais tarde.'
+            description:
+              'Ops. Tivemos um problema ao salvar a categoria do prato, tente novamente mais tarde.'
           });
           reloadPage();
         }
-       
       } else {
-        try{
-          const res = await api.post(`/category`,data);
-          if(res.status===200){
+        try {
+          const res = await api.post(`/category`, data);
+          if (res.status === 201) {
             toast({
-              variant: 'destructive',
-              title: 'Atualizado com sucesso.',
-              description: 'Categoria do prato AtualIzado com sucesso.'
+              variant: 'primary',
+              title: 'Cadastrado com sucesso.',
+              description: 'Categoria do prato Atualizado com sucesso.'
             });
             reloadPage();
           }
-        }catch(error){
+        } catch (error) {
           toast({
             variant: 'destructive',
             title: 'Erro ao cadastrar',
-            description: 'Ops. Tivemos um problema ao salvar a categoria do prato, tente novamente mais tarde.'
+            description:
+              'Ops. Tivemos um problema ao salvar a categoria do prato, tente novamente mais tarde.'
           });
           reloadPage();
         }
       }
-    
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
+        title: 'Erro ao se comunicar com o sistema.',
         description: 'There was a problem with your request.'
       });
     } finally {
@@ -126,10 +133,9 @@ export const CateroyDishForm : React.FC<CategoryDishFormProps> = ({ initialData 
   const onDelete = async () => {
     try {
       setLoading(true);
-      try{
-        console.log(initialData)
+      try {
         const response = await api.delete(`/category/${initialData.id}`);
-        if(response.status===200){
+        if (response.status === 200) {
           toast({
             variant: 'destructive',
             title: 'Deletado com sucesso.',
@@ -137,7 +143,7 @@ export const CateroyDishForm : React.FC<CategoryDishFormProps> = ({ initialData 
           });
           reloadPage();
         }
-      }catch(error){
+      } catch (error) {
         toast({
           variant: 'destructive',
           title: 'Erro ao deletar',
@@ -178,7 +184,7 @@ export const CateroyDishForm : React.FC<CategoryDishFormProps> = ({ initialData 
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-full space-y-8"
-        >        
+        >
           <div className="gap-8 md:grid md:grid-cols-3">
             <FormField
               control={form.control}

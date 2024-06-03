@@ -26,12 +26,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
       const response = await api.post('/file-upload', formData);
       onUploadSuccess(response.data.file);
       toast({
-        variant: 'default',
-        title: 'Success',
-        description: 'File uploaded successfully.'
+        variant: 'primary',
+        title: 'Sucesso',
+        description: 'Seu arquivo foi enviado com sucesso.'
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       // toast({
       //   variant: 'destructive',
       //   title: 'Error',

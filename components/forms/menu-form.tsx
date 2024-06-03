@@ -40,30 +40,31 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const descriptionParam = searchParams.get('description') || '';
   const name = searchParams.get('name') || '';
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  if (params['menuId'] !== 'new') {
+    initialData = {
+      id: params['menuId'],
+      name: name || '',
+      description: descriptionParam || '',
+      dishesId: initialData?.dishesId || []
+    };
+  } else {
+    initialData = null;
+  }
   useEffect(() => {
     fetchDishes();
-    if (params['menuId'] !== 'new') {
-      initialData = {
-        id: params['menuId'],
-        name: name || '',
-        description: initialData?.description || '',
-        dishesId: initialData?.dishesId || []
-      };
-    } else {
-      initialData = null;
-    }
-  }, [params, name, initialData]);
-
-  const title = initialData ? 'Editar Item' : 'Criar Item';
-  const description = initialData ? 'Editar Item' : 'Adicionar novo Item';
+  }, []);
+  const title = initialData ? 'Editar Cardápio' : 'Criar Cardápio';
+  const description = initialData
+    ? 'Editar Cardápio'
+    : 'Adicionar novo Cardápio';
   const toastMessage = initialData ? 'Atualizado' : 'Criado';
   const action = initialData ? 'Salvar' : 'Criar';
-  const [dishes, setDisehs] = useState([]);
+  const [dishes, setDishes] = useState([]);
   const fetchDishes = async () => {
     try {
       const response = await api.get('/dish');
@@ -72,6 +73,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
           id: dish.id,
           name: dish.name
         }));
+        setDishes(formattedData);
       }
     } catch (error) {
       console.error(error);
@@ -85,7 +87,6 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
         description: '',
         dishesId: []
       };
-
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues
@@ -93,41 +94,49 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
 
   const onSubmit = async (data: MenuFormValues) => {
     try {
-      setLoading(true);
-      if (initialData) {
-        await api.put(`item-type/${initialData.id}`, data);
+      if (params['menuId'] === 'new') {
+        const response = await api.post('/menu', {
+          name: data.name,
+          description: data.description,
+          dishIds: data.dishesId
+        });
+        if (response.status === 201) {
+          reloadPage();
+          toast({
+            variant: 'primary',
+            title: 'Menu Criado com sucesso '
+          });
+        }
       } else {
-        const res = await api.post(`/item-type`, data);
-        console.log(res);
+        const response = await api.put(`/menu/${params['menuId']}`, {
+          name: data.name,
+          description: data.description,
+          dishIds: data.dishesId
+        });
+        if (response.status === 200) {
+          reloadPage();
+          toast({
+            variant: 'primary',
+            title: 'Menu Atualizado com sucesso '
+          });
+        }
       }
-      router.refresh();
-      router.push(`/dashboard/item-type`);
-      toast({
-        title: 'Successo',
-        description: toastMessage
-      });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.'
-      });
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) {}
   };
 
   const onDelete = async () => {
     try {
       setLoading(true);
       await api.delete(`/items-type/${params.itemId}`);
-      router.refresh();
-      router.push(`/${params.storeId}/item-type`);
     } catch (error: any) {
     } finally {
       setLoading(false);
       setOpen(false);
     }
+  };
+  const reloadPage = () => {
+    router.refresh();
+    router.push(`/dashboard/menu`);
   };
 
   return (
@@ -191,20 +200,19 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
               </FormItem>
             )}
           />
-          {/* <FormField
+          <FormField
             control={form.control}
             name="dishesId"
             render={({ field }) => (
               <DishesSelect
-                categories={null}
+                dishes={dishes}
                 value={field.value}
                 onValueChange={(value) => {
-                  console.log(value);
                   field.onChange(value);
                 }}
               />
             )}
-          /> */}
+          />
           <Button disabled={loading} className="ml-auto" type="submit">
             {action}
           </Button>

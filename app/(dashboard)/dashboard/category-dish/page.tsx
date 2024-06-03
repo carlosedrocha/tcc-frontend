@@ -14,7 +14,7 @@ import Link from 'next/link';
 type ParamsProps = {
   searchParams: {
     [key: string]: string | string[] | undefined;
-  };  
+  };
 };
 
 const breadcrumbItems = [{ title: 'Categoria Prato', link: '/category-dish' }];
@@ -31,9 +31,8 @@ export default function Page({ searchParams }: ParamsProps) {
     const getCategoryDishes = async () => {
       try {
         const response = await api.get('/category', {
-        //   params: { offset, limit: pageLimit }
+          //   params: { offset, limit: pageLimit }
         });
-        console.log(response.data)
         setData(response.data);
         setPageCount(0);
       } catch (error) {
@@ -43,7 +42,7 @@ export default function Page({ searchParams }: ParamsProps) {
 
     getCategoryDishes();
   }, [page, pageLimit, offset]);
-const totalItems = data.length;
+  const totalItems = data.length;
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <BreadCrumb items={breadcrumbItems} />

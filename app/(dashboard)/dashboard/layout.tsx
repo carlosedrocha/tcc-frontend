@@ -3,8 +3,10 @@ import Sidebar from '@/components/layout/sidebar';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn Dashboard Starter',
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'Brew Master',
+  description: '',
+  icons:
+    'https://brew-master-dev.s3.us-east-2.amazonaws.com/FundoTrasnparenteLogo.png'
 };
 
 export default function DashboardLayout({

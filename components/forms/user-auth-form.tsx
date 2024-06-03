@@ -114,7 +114,7 @@ export default function UserAuthForm() {
           />
 
           <Button disabled={loading} className="ml-auto w-full" type="submit">
-            Continue With Email
+            Realizar Login
           </Button>
         </form>
       </Form>
