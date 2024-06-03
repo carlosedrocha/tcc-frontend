@@ -79,14 +79,15 @@ export const ItemTypeForm: React.FC<ItemTypeFormProps> = ({ initialData }) => {
       router.refresh();
       router.push(`/dashboard/item-type`);
       toast({
+        variant: 'primary',
         title: 'Successo',
         description: toastMessage
       });
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.'
+        title: 'Erro ao se comunicar com o sistema.',
+        description: ''
       });
     } finally {
       setLoading(false);

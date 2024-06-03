@@ -37,14 +37,13 @@ const Page = ({ searchParams }: paramsProps) => {
   const page = Number(searchParams.page) || 1;
   const pageLimit = Number(searchParams.limit) || 10;
   const offset = (page - 1) * pageLimit;
-  useEffect(() => { 
+  useEffect(() => {
     const getItemTypes = async () => {
       try {
         const response = await api.get('/item-type', {
           params: { offset, limit: pageLimit }
         });
 
-        console.log(response);
         setData(response.data);
         setPageCount(Math.ceil(response.data.total / pageLimit));
       } catch (error) {
@@ -56,8 +55,6 @@ const Page = ({ searchParams }: paramsProps) => {
   }, [page, pageLimit, offset]);
 
   const totalItems = data.length;
-  console.log(data);
-
   return (
     <>
       <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

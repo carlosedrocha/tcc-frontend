@@ -44,7 +44,6 @@ const Page = ({ searchParams }: paramsProps) => {
           params: { offset, limit: pageLimit }
         });
 
-        console.log(response.data);
         setData(response.data);
         setPageCount(Math.ceil(response.data.total / pageLimit));
       } catch (error) {
@@ -56,7 +55,6 @@ const Page = ({ searchParams }: paramsProps) => {
   }, [page, pageLimit, offset]);
 
   const totalItems = data.length;
-  console.log(data);
 
   return (
     <>

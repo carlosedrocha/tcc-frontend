@@ -91,7 +91,7 @@ export const DishForm: React.FC<DishFormProps> = ({
   const changeNewToNullId = () => {
     if (id === 'new') {
       id = null;
-    };
+    }
   };
   changeNewToNullId();
   let currentDish: IDish | null = null;
@@ -117,9 +117,8 @@ export const DishForm: React.FC<DishFormProps> = ({
       } catch (error) {
         toast({
           variant: 'destructive',
-          title: 'Error fetching dish.',
-          description:
-            'There was a problem fetching dish, please try again later.'
+          title: 'Erro ao buscar pratos.',
+          description: ''
         });
       }
     };
@@ -131,9 +130,8 @@ export const DishForm: React.FC<DishFormProps> = ({
       } catch (error) {
         toast({
           variant: 'destructive',
-          title: 'Error fetching categories.',
-          description:
-            'There was a problem fetching categories, please try again later.'
+          title: 'Erro ao buscar as categorias.',
+          description: ''
         });
       }
     };
@@ -145,7 +143,7 @@ export const DishForm: React.FC<DishFormProps> = ({
       } catch (error) {
         toast({
           variant: 'destructive',
-          title: 'Error fetching items.',
+          title: 'Erro ao buscar os items.',
           description:
             'There was a problem fetching items, please try again later.'
         });
@@ -161,7 +159,6 @@ export const DishForm: React.FC<DishFormProps> = ({
   const description = id !== 'new' ? 'Editar Prato' : 'Adicionar Prato';
   const toastMessage = id !== 'new' ? 'Prato Atualizado' : 'Prato Criado';
   const action = id !== 'new' ? 'Save changes' : 'Create';
-
 
   const defaultValues = initialData
     ? initialData
@@ -190,11 +187,9 @@ export const DishForm: React.FC<DishFormProps> = ({
   };
 
   const onSubmit = async (data: DishFormValues) => {
-    console.log('data submit', data);
     try {
       setLoading(true);
       if (id) {
-        console.log('caiu dentro id');
         await api.put(`/dish/${id}`, {
           categoriesIds: data.categoriesIds,
           name: data.name,
@@ -205,7 +200,6 @@ export const DishForm: React.FC<DishFormProps> = ({
           items: data.items
         });
       } else {
-        console.log('caiu fora id');
         const res = await api.post(`/dish`, {
           categoriesIds: data.categoriesIds,
           name: data.name,
@@ -218,7 +212,6 @@ export const DishForm: React.FC<DishFormProps> = ({
             quantity: parseInt(item.quantity.toString())
           }))
         });
-        console.log('dish', res);
       }
       router.refresh();
       router.push(`/dashboard/dish`);
@@ -228,7 +221,7 @@ export const DishForm: React.FC<DishFormProps> = ({
         description: 'There was a problem with your request.'
       });
     } catch (error: any) {
-      console.log(error)
+      console.log(error);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
@@ -334,7 +327,6 @@ export const DishForm: React.FC<DishFormProps> = ({
                   categories={categories}
                   value={field.value}
                   onValueChange={(value) => {
-                    console.log(value);
                     field.onChange(value);
                   }}
                 />
@@ -412,7 +404,7 @@ export const DishForm: React.FC<DishFormProps> = ({
               </Button>
             </div>
           </div>
-          {/* aqui todo check why button*/ }
+          {/* aqui todo check why button*/}
           {/* <Button className="ml-auto" type="submit">
             {action}
           </Button> */}
@@ -420,8 +412,6 @@ export const DishForm: React.FC<DishFormProps> = ({
             className="ml-auto"
             type="submit"
             onClick={() => {
-              console.log(form.getValues());
-              console.log(form.getValues().name);
               onSubmit(form.getValues());
             }}
           >

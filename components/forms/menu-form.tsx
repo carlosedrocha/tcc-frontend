@@ -40,25 +40,24 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const descriptionParam = searchParams.get('description') || '';
   const name = searchParams.get('name') || '';
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  if (params['menuId'] !== 'new') {
+    initialData = {
+      id: params['menuId'],
+      name: name || '',
+      description: descriptionParam || '',
+      dishesId: initialData?.dishesId || []
+    };
+  } else {
+    initialData = null;
+  }
   useEffect(() => {
     fetchDishes();
-    if (params['menuId'] !== 'new') {
-      initialData = {
-        id: params['menuId'],
-        name: name || '',
-        description: initialData?.description || '',
-        dishesId: initialData?.dishesId || []
-      };
-    } else {
-      initialData = null;
-    }
-  }, [params, name, initialData]);
-
+  }, []);
   const title = initialData ? 'Editar Cardápio' : 'Criar Cardápio';
   const description = initialData
     ? 'Editar Cardápio'
@@ -88,7 +87,6 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
         description: '',
         dishesId: []
       };
-
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues
@@ -96,12 +94,32 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
 
   const onSubmit = async (data: MenuFormValues) => {
     try {
-      const response = await api.post('menu', {
-        name: data.name,
-        description: data.description,
-        dishIds: data.dishesId
-      });
-      if (response.status === 201) {
+      if (params['menuId'] === 'new') {
+        const response = await api.post('/menu', {
+          name: data.name,
+          description: data.description,
+          dishIds: data.dishesId
+        });
+        if (response.status === 201) {
+          reloadPage();
+          toast({
+            variant: 'primary',
+            title: 'Menu Criado com sucesso '
+          });
+        }
+      } else {
+        const response = await api.put(`/menu/${params['menuId']}`, {
+          name: data.name,
+          description: data.description,
+          dishIds: data.dishesId
+        });
+        if (response.status === 200) {
+          reloadPage();
+          toast({
+            variant: 'primary',
+            title: 'Menu Atualizado com sucesso '
+          });
+        }
       }
     } catch (error) {}
   };
@@ -110,13 +128,15 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       await api.delete(`/items-type/${params.itemId}`);
-      router.refresh();
-      router.push(`/${params.storeId}/item-type`);
     } catch (error: any) {
     } finally {
       setLoading(false);
       setOpen(false);
     }
+  };
+  const reloadPage = () => {
+    router.refresh();
+    router.push(`/dashboard/menu`);
   };
 
   return (

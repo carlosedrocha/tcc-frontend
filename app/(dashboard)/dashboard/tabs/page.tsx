@@ -47,9 +47,13 @@ export default function Page() {
   const fetchTab = async () => {
     try {
       const response = await api.get('/tab');
+      console.log(response.data);
       const tabsData: TabCardData[] = response.data.map((tab: any) => ({
         id: tab.id,
-        number: tab.tabNumber.toString(),
+        number:
+          tab.tabNumber.toString() === undefined
+            ? ''
+            : tab.tabNumber.toString(),
         name: tab.entity.firstName,
         status: tab.status
       }));
@@ -144,6 +148,7 @@ export default function Page() {
           } else {
             toast({
               title: 'Erro ao registrar comanda',
+              variant: 'destructive',
               description: 'Ocorreu um erro ao tentar registrar a comanda.'
             });
           }
@@ -151,6 +156,7 @@ export default function Page() {
           console.error('Erro ao registrar comanda:', error);
           toast({
             title: 'Erro ao registrar comanda',
+            variant: 'destructive',
             description: 'Ocorreu um erro ao tentar registrar a comanda.'
           });
         }
@@ -239,7 +245,7 @@ export default function Page() {
                 </CardHeader>
                 <CardContent>
                   <Link
-                    href={`/dashboard/menu?tabId=${tab.id}?name=${tab.name}`}
+                    href={`/dashboard/menu?tabId=${tab.id}&tabNumber=${tab.number}`}
                     className={cn(buttonVariants({ variant: 'default' }))}
                   >
                     Acessar pedido

@@ -128,14 +128,13 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
         cost: parseFloat(data.price.replace(',', '.')),
         typeId: data.typeId
       };
-      console.log(fomatedData);
       setLoading(true);
       try {
         if (urlId != 'new') {
           const response = await api.put(`/item/${urlId}`, fomatedData);
           if (response.status === 200) {
             toast({
-              variant: 'destructive',
+              variant: 'primary',
               title: 'Alteração relizada com sucesso',
               description: 'Item foi atualizado com sucesso.'
             });
@@ -146,7 +145,7 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
           const response = await api.post(`/item`, fomatedData);
           if (response.status === 201) {
             toast({
-              variant: 'destructive',
+              variant: 'primary',
               title: 'Cadastro relizado com sucesso',
               description: 'Item foi cadastrado com sucesso.'
             });

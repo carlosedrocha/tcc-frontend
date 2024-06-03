@@ -76,7 +76,6 @@ export const CateroyDishForm: React.FC<CategoryDishFormProps> = ({
     router.push(`/dashboard/category-dish`);
   };
   const onSubmit = async (data: CategoryDishFormValues) => {
-    console.log('oi');
     try {
       setLoading(true);
       if (initialData) {
@@ -84,7 +83,7 @@ export const CateroyDishForm: React.FC<CategoryDishFormProps> = ({
           const res = await api.put(`/category/${initialData.id}`, data);
           if (res.status === 200) {
             toast({
-              variant: 'destructive',
+              variant: 'primary',
               title: 'Cadastrado com sucesso.',
               description: 'Categoria do prato AtualIzado com sucesso.'
             });
@@ -104,9 +103,9 @@ export const CateroyDishForm: React.FC<CategoryDishFormProps> = ({
           const res = await api.post(`/category`, data);
           if (res.status === 201) {
             toast({
-              variant: 'destructive',
+              variant: 'primary',
               title: 'Cadastrado com sucesso.',
-              description: 'Categoria do prato AtualIzado com sucesso.'
+              description: 'Categoria do prato Atualizado com sucesso.'
             });
             reloadPage();
           }
@@ -123,7 +122,7 @@ export const CateroyDishForm: React.FC<CategoryDishFormProps> = ({
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
+        title: 'Erro ao se comunicar com o sistema.',
         description: 'There was a problem with your request.'
       });
     } finally {
@@ -135,7 +134,6 @@ export const CateroyDishForm: React.FC<CategoryDishFormProps> = ({
     try {
       setLoading(true);
       try {
-        console.log(initialData);
         const response = await api.delete(`/category/${initialData.id}`);
         if (response.status === 200) {
           toast({
