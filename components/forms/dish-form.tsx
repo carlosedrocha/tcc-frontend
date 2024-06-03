@@ -199,6 +199,12 @@ export const DishForm: React.FC<DishFormProps> = ({
           photoUrl: data.photoUrl ?? null,
           items: data.items
         });
+        router.refresh();
+        router.push(`/dashboard/dish`);
+        toast({
+          variant: 'primary',
+          title: 'Prato Alterado com sucesso.'
+        });
       } else {
         const res = await api.post(`/dish`, {
           categoriesIds: data.categoriesIds,
@@ -216,9 +222,8 @@ export const DishForm: React.FC<DishFormProps> = ({
       router.refresh();
       router.push(`/dashboard/dish`);
       toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.'
+        variant: 'primary',
+        title: 'Prato Adicionado com sucesso.'
       });
     } catch (error: any) {
       console.log(error);
