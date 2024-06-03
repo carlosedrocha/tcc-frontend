@@ -1,23 +1,18 @@
+'use client';
 import BreadCrumb from '@/components/breadcrumb';
-import { ProductForm } from '@/components/forms/product-form';
+import { EmployeeForm } from '@/components/forms/employee-form';
 
 //todo backend integration
 export default function Page() {
   const breadcrumbItems = [
-    { title: 'Funcionários', link: '/dashboard/employee' },
-    { title: 'Criar', link: '/dashboard/employee/create' }
+    { title: 'Funcionários', link: '/dashboard/item' },
+    { title: 'Cadastrar', link: '/dashboard/item/new' }
   ];
+
   return (
     <div className="flex-1 space-y-4 p-8">
       <BreadCrumb items={breadcrumbItems} />
-      <ProductForm
-        categories={[
-          { _id: 'shirts', name: 'shirts' },
-          { _id: 'pants', name: 'pants' }
-        ]}
-        initialData={null}
-        key={null}
-      />
+      <EmployeeForm initialData={null} key={null} />
     </div>
   );
 }

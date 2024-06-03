@@ -223,7 +223,7 @@ export const ItemForm: React.FC<ItemForm> = ({
                 </FormItem>
               )}
             />
-                        <FormField
+            <FormField
               control={form.control}
               name="typeId"
               render={({ field }) => (
