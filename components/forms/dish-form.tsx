@@ -416,9 +416,11 @@ export const DishForm: React.FC<DishFormProps> = ({
           <Button
             className="ml-auto"
             type="submit"
-            onClick={() => {
-              onSubmit(form.getValues());
-            }}
+            // onClick={() => {
+            //   console.log(form.getValues());
+            //   console.log(form.getValues().name);
+            //   // onSubmit(form.getValues());
+            // }}
           >
             Enviar
           </Button>
