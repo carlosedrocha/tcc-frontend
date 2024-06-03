@@ -193,7 +193,6 @@ export default function Page() {
   const handleTeste = async () => {
     try {
       console.log(orderId);
-      console.log(!orderId);
       if (!orderId) {
         const promises = orderCart.map(async (item) => {
           return { id: item.dish.id, quantity: item.quantity };
@@ -210,21 +209,38 @@ export default function Page() {
           router.push(`/dashboard/tabs`);
         }
       } else {
-        let quantityOld = 0;
-        oldOrder.map((item: any) => {
-          quantityOld += item.quantity;
-        });
-        console.log(quantityOld);
-        const promises = orderCart.map(async (item) => {
-          return { id: item.dish.id, quantity: quantityOld + item.quantity };
-        });
+        const combinedOrders = [...oldOrder];
 
-        const result = await Promise.all(promises);
-        const formatedData = {
+        orderCart.forEach((newOrderItem) => {
+          const existingOrderItem = combinedOrders.find(
+            (item) => item.id === newOrderItem.dish.id
+          );
+
+          if (existingOrderItem) {
+            // Se o prato já existe no pedido antigo, soma as quantidades
+            existingOrderItem.quantity += newOrderItem.quantity;
+          } else {
+            // Se o prato não existe no pedido antigo, adiciona ao combinado
+            combinedOrders.push({
+              id: newOrderItem.dish.id,
+              name: newOrderItem.dish.name,
+              price: newOrderItem.dish.price,
+              quantity: newOrderItem.quantity
+            });
+          }
+        });
+        console.log(combinedOrders);
+
+        // Formate os dados para enviar para o backend
+        const formattedData = {
           tabId: tabId,
-          dishes: result
+          dishes: combinedOrders.map((item) => ({
+            id: item.id,
+            quantity: item.quantity
+          }))
         };
-        const response = await api.put(`/order/${orderId}`, formatedData);
+
+        const response = await api.put(`/order/${orderId}`, formattedData);
         if (response.status === 200) {
           router.refresh();
           router.push(`/dashboard/tabs`);
