@@ -1,4 +1,5 @@
 'use client';
+import api from '@/app/api';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -21,94 +22,168 @@ import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Trash } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import FileUpload from '../file-upload';
+// import FileUpload from "@/components/FileUpload";
 import { useToast } from '../ui/use-toast';
-const ImgSchema = z.object({
-  fileName: z.string(),
-  name: z.string(),
-  fileSize: z.number(),
-  size: z.number(),
-  fileKey: z.string(),
-  key: z.string(),
-  fileUrl: z.string(),
-  url: z.string()
-});
-export const IMG_MAX_LIMIT = 3;
+
+// Define the new schema
 const formSchema = z.object({
-  name: z
+  email: z.string().email({ message: 'Invalid email address' }),
+  password: z
     .string()
-    .min(3, { message: 'Employee Name must be at least 3 characters' }),
-  imgUrl: z
-    .array(ImgSchema)
-    .max(IMG_MAX_LIMIT, { message: 'You can only add up to 3 images' }),
-  // .min(0, { message: 'At least one image must be added.' }),
-  description: z
-    .string()
-    .min(3, { message: 'Employee description must be at least 3 characters' }),
-  price: z.coerce.number(),
-  category: z.string().min(1, { message: 'Please select a category' })
+    .min(3, { message: 'Password must be at least 3 characters' }),
+  firstName: z.string().min(1, { message: 'First name is required' }),
+  lastName: z.string().min(1, { message: 'Last name is required' }),
+  cpf: z.string().min(1, { message: 'CPF is required' }),
+  roleId: z.coerce.number().min(1, { message: 'Role is required' })
 });
 
 type EmployeeFormValues = z.infer<typeof formSchema>;
 
 interface EmployeeFormProps {
   initialData: any | null;
-  categories: any;
 }
 
-export const EmployeeForm: React.FC<EmployeeFormProps> = ({
-  initialData,
-  categories
-}) => {
+// todo fix this Interface
+interface IRole {
+  id: number | string;
+  name: string;
+}
+
+export enum rolesEnum {
+  WAITER = 'Waiter'
+}
+
+export const translatedRolesEnum = {
+  [rolesEnum.WAITER]: 'Garçom'
+  // [rolesEnum.ADMIN]: 'Administrador',
+  // [rolesEnum.USER]: 'Usuário',
+  // [rolesEnum.MANAGER]: 'Gerente',
+};
+
+const useEmployeeData = (id) => {
+  const { toast } = useToast();
+  const [roles, setRoles] = useState<IRole[]>([]);
+  const [employeeData, setEmployeeData] = useState();
+  const initialDataRef = useRef(null);
+
+  useEffect(() => {
+    const fetchCurrentEmployee = async () => {
+      try {
+        if (!id) {
+          return;
+        }
+        const response = await api.get(`employee/${id}`);
+        const data = response.data;
+        initialDataRef.current = {
+          email: data.user.email || '',
+          password: '',
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          cpf: data.cpf || '',
+          roleId: data.user.role.id || null
+        };
+        setEmployeeData(initialDataRef.current);
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao buscar dados do funcionário',
+          description:
+            'Houve um problema ao buscar os dados, tente novamente mais tarde.'
+        });
+      }
+    };
+
+    const fetchRoles = async () => {
+      try {
+        const response = await api.get('role');
+        setRoles(response.data);
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Falha ao buscar cargos.',
+          description: 'Houve um erro ao buscar os cargos, tente novamente.'
+        });
+      }
+    };
+
+    fetchRoles();
+    fetchCurrentEmployee();
+  }, [id, toast]);
+
+  return { roles, employeeData };
+};
+
+export const EmployeeForm: React.FC<EmployeeFormProps> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const title = initialData ? 'Edit employee' : 'Create employee';
-  const description = initialData ? 'Edit a employee.' : 'Add a new employee';
-  const toastMessage = initialData ? 'Employee updated.' : 'Employee created.';
-  const action = initialData ? 'Save changes' : 'Create';
+  // const [roles, setRoles] = useState<IRole[]>([]);
 
+  const id = params['employeeId'] === 'new' ? null : params['employeeId'];
+
+  const { roles, employeeData } = useEmployeeData(id);
+  console.log('formcomponent', employeeData);
+  initialData = employeeData ? employeeData : initialData;
+
+  
+
+  const title = initialData ? 'Editar Funcionário' : 'Adicionar Funcionário';
+  const description = initialData
+    ? 'Editar o Funcionário.'
+    : 'Adicionar Funcionário';
+  const toastMessage = initialData
+    ? 'Funcionário Atualizado.'
+    : 'Funcionário Criado.';
+  const action = initialData ? 'Salvar' : 'Criar';
+  1;
   const defaultValues = initialData
     ? initialData
     : {
-        name: '',
-        description: '',
-        price: 0,
-        imgUrl: [],
-        category: ''
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        cpf: '',
+        roleId: null
       };
+
+  console.log('defaultValues', defaultValues);
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues
+    defaultValues: defaultValues
   });
+
+  useEffect(() => {
+    if (employeeData) {
+      form.reset(employeeData);
+    }
+  }, [employeeData, form]);
 
   const onSubmit = async (data: EmployeeFormValues) => {
     try {
       setLoading(true);
-      if (initialData) {
-        // await axios.post(`/api/employees/edit-employee/${initialData._id}`, data);
+      if (id) {
+        await api.put(`/employee/${id}`, data);
       } else {
-        // const res = await axios.post(`/api/employees/create-employee`, data);
+        const res = await api.post(`/employee`, data);
         // console.log("employee", res);
       }
       router.refresh();
-      router.push(`/dashboard/employees`);
+      router.push(`/dashboard/employee`);
       toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.'
+        title: toastMessage
       });
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.'
+        title: 'Uh oh! Algo deu errado',
+        description: 'Houve um problema com a solicitação, tente novamente.'
       });
     } finally {
       setLoading(false);
@@ -127,8 +202,6 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
       setOpen(false);
     }
   };
-
-  const triggerImgUrlValidation = () => form.trigger('imgUrl');
 
   return (
     <>
@@ -157,34 +230,18 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-full space-y-8"
         >
-          <FormField
-            control={form.control}
-            name="imgUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Images</FormLabel>
-                <FormControl>
-                  <FileUpload
-                    onChange={field.onChange}
-                    value={field.value}
-                    onRemove={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <div className="gap-8 md:grid md:grid-cols-3">
             <FormField
               control={form.control}
-              name="name"
+              name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Nome</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Employee name"
+                      placeholder="John"
+                      defaultValue={field.value}
                       {...field}
                     />
                   </FormControl>
@@ -194,14 +251,15 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="description"
+              name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Sobrenome</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Employee description"
+                      placeholder="Doe"
+                      defaultValue={field.value}
                       {...field}
                     />
                   </FormControl>
@@ -211,12 +269,38 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="price"
+              name="cpf"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price</FormLabel>
+                  <FormLabel>CPF</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} {...field} />
+                    <Input
+                      disabled={loading}
+                      placeholder="CPF"
+                      defaultValue={field.value}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <Separator />
+          <div className="gap-8 md:grid md:grid-cols-3">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="john@doe.com"
+                      defaultValue={field.value}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -224,29 +308,47 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="category"
+              name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>Senha</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      disabled={loading}
+                      placeholder="..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="roleId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cargo</FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value}
+                    defaultValue={
+                      field.value ?? defaultValues.roleId?.toString()
+                    }
                   >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
                           defaultValue={field.value}
-                          placeholder="Select a category"
+                          placeholder="Selecione"
                         />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {/* @ts-ignore  */}
-                      {categories.map((category) => (
-                        <SelectItem key={category._id} value={category._id}>
-                          {category.name}
+                      {roles.map((role) => (
+                        <SelectItem key={role.id} value={role.id.toString()}>
+                          {translatedRolesEnum[role.name] || role.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
