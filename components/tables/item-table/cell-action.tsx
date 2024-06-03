@@ -21,15 +21,14 @@ interface CellActionProps {
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const router = useRouter();  
+  const router = useRouter();
   const onConfirm = async () => {
-    try{
-      await api.delete(`item/${data.id}`)
+    try {
+      await api.delete(`/item/${data.id}`);
       setOpen(false);
       router.refresh();
-      router.push(`/dashboard/item`);
-    } catch (error: any) {
-    }
+      router.push('/dashboard');
+    } catch (error: any) {}
   };
 
   return (

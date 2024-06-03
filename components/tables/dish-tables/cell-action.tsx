@@ -12,7 +12,8 @@ import { IDish } from '@/constants/data';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
+import { useToast } from '@/components/ui/use-toast';
+import api from '@/app/api';
 interface CellActionProps {
   data: IDish;
 }
@@ -21,8 +22,26 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const router = useRouter();
-
-  const onConfirm = async () => {};
+  const { toast } = useToast();
+  const onConfirm = async () => {
+    try {
+      const res = await api.delete(`/dish/${data.id}`);
+      if (res.status === 200) {
+        toast({
+          variant: 'primary',
+          title: 'Prato deleatado com sucesso'
+        });
+        setOpen(false);
+        router.refresh();
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao deletar o prato'
+      });
+    }
+  };
 
   return (
     <>

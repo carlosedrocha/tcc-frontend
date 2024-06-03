@@ -9,6 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { toast } from '@/components/ui/use-toast';
 import { ItemTypeT } from '@/constants/data'; // Adjust the import to your ItemType definition
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -28,8 +29,12 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     try {
       await api.delete(`/item-type/${data.id}`);
       setOpen(false);
+      toast({
+        variant: 'primary',
+        title: 'Tipo de Item deletado com sucesso'
+      });
       router.refresh();
-      router.push(`/dashboard/item-type`);
+      router.push(`/dashboard/`);
     } catch (error: any) {}
   };
 
@@ -51,7 +56,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Ações</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/item-type/${data.id}?name=${data.name}`)}
+            onClick={() =>
+              router.push(`/dashboard/item-type/${data.id}?name=${data.name}`)
+            }
           >
             <Edit className="mr-2 h-4 w-4" /> Atualizar
           </DropdownMenuItem>
