@@ -154,7 +154,7 @@ export default function Page() {
   const calculateTotal = (order: any) => {
     let total = 0;
 
-    order.forEach((item: any) => {
+    order.dishesOrder.forEach((item: any) => {
       total += item.dish.price * item.quantity;
     });
     return total;
@@ -255,6 +255,11 @@ export default function Page() {
       });
     }
   };
+
+  const hasValidDishes = (order) =>
+    order.dishesOrder.some(
+      (item) => item.quantity > 0 && item.deletedAt === null
+    );
 
   return (
     <>
@@ -427,65 +432,76 @@ export default function Page() {
               </div>
             </div>
           )}
-          <div className="flex-1 overflow-y-auto">
-            {/* Iterate over each order */}
-            {oldOrders.map((order, orderIndex) => (
-              <div key={orderIndex}>
-                <h2 className="text-2xl font-bold">Pedido {orderIndex + 1}</h2>
-                <ul className="mt-6">
-                  {/* Iterate over dishes in each order */}
-                  {order.dishesOrder.map(
-                    (item, dishIndex) =>
-                      // Renderiza apenas se a quantidade for maior que 0
-                      item.quantity > 0 &&
-                      item.deletedAt === null && (
-                        <li
-                          key={dishIndex}
-                          className="mb-4 flex items-center justify-between border-b border-gray-100 pb-2"
-                        >
-                          <div>
-                            <h4 className="text-xl">{item.dish.name}</h4>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="mr-8">
-                              Quantidade: {item.quantity}
-                            </span>
-                            <span className="mr-8">
-                              Preço:{' '}
-                              {(item.dish.price * item.quantity).toLocaleString(
-                                'pt-BR',
-                                {
+          <div className="flex-1 overflow-y-auto" style={{ marginTop: '60px' }}>
+            {oldOrders.map(
+              (order, orderIndex) =>
+                hasValidDishes(order) && (
+                  <div key={orderIndex} className="mt-10">
+                    <h2 className="text-2xl font-bold">
+                      Pedido {orderIndex + 1}
+                    </h2>
+                    {order.dishesOrder.map(
+                      (item, dishIndex) =>
+                        item.quantity > 0 &&
+                        item.deletedAt === null && (
+                          <li
+                            key={dishIndex}
+                            className="mb-4 mt-4 flex items-center justify-between border-b border-gray-100 pb-2"
+                          >
+                            <div>
+                              <h4 className="text-xl">{item.dish.name}</h4>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="mr-8">
+                                Quantidade: {item.quantity}
+                              </span>
+                              <span className="mr-8">
+                                Preço:{' '}
+                                {(
+                                  item.dish.price * item.quantity
+                                ).toLocaleString('pt-BR', {
                                   style: 'currency',
                                   currency: 'BRL'
+                                })}
+                              </span>
+                              <Button
+                                variant="destructive"
+                                onClick={() =>
+                                  handleRemoveItemFromOrder(
+                                    orderIndex,
+                                    dishIndex
+                                  )
                                 }
-                              )}
-                            </span>
-                            <Button
-                              variant="destructive"
-                              onClick={() =>
-                                handleRemoveItemFromOrder(orderIndex, dishIndex)
-                              }
-                            >
-                              Excluir Item
-                            </Button>
-                          </div>
-                        </li>
-                      )
-                  )}
-                </ul>
-                {showUpdateButton && (
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() => {
-                        handlePutOldOrder(orderIndex);
-                      }}
-                    >
-                      Alterar Pedido
-                    </Button>
+                              >
+                                Excluir Item
+                              </Button>
+                            </div>
+                          </li>
+                        )
+                    )}
+                    {showUpdateButton && (
+                      <div className="flex justify-end">
+                        <Button
+                          onClick={() => {
+                            handlePutOldOrder(orderIndex);
+                          }}
+                        >
+                          Alterar Pedido
+                        </Button>
+                      </div>
+                    )}
+                    <div style={{ textAlign: 'right', marginTop: '20px' }}>
+                      <p>
+                        Total:{' '}
+                        {calculateTotal(order).toLocaleString('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        })}
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+                )
+            )}
           </div>
         </div>
       </ScrollArea>
