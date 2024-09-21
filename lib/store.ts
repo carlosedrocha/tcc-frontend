@@ -9,7 +9,15 @@ export type Status = 'TODO' | 'IN_PROGRESS' | 'DONE';
 const defaultCols = [
   {
     id: 'TODO' as const,
-    title: 'Todo'
+    title: 'A Fazer'
+  },
+  {
+    id: 'IN_PROGRESS' as const,
+    title: 'Em Andamento'
+  },
+  {
+    id: 'DONE' as const,
+    title: 'Finalizado'
   }
 ] satisfies Column[];
 
@@ -49,7 +57,9 @@ export const useTaskStore = create<State & Actions>()(
         set((state) => ({
           tasks: [
             ...state.tasks,
-            { id: uuid(), title, description, status: 'TODO' }
+            { id: uuid(), title, description, status: 'TODO' },
+            { id: uuid(), title, description, status: 'IN_PROGRESS' },
+            { id: uuid(), title, description, status: 'DONE' }
           ]
         })),
       updateCol: (id: UniqueIdentifier, newName: string) =>

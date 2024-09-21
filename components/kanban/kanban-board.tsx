@@ -27,15 +27,15 @@ import { TaskCard } from './task-card';
 const defaultCols = [
   {
     id: 'TODO' as const,
-    title: 'Todo'
+    title: 'A Fazer'
   },
   {
     id: 'IN_PROGRESS' as const,
-    title: 'In progress'
+    title: 'Em Andamento'
   },
   {
     id: 'DONE' as const,
-    title: 'Done'
+    title: 'Finalizado'
   }
 ] satisfies Column[];
 
