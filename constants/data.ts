@@ -206,6 +206,12 @@ export const navItems: NavItem[] = [
     icon: 'employee',
     label: 'employee'
   },
+  {
+    title: 'Gastos',
+    href: '/dashboard/expense',
+    icon: 'employee',
+    label: 'employee'
+  },
   // {
   //   title: 'Mudar o',
   //   href: '/dashboard/profile',
