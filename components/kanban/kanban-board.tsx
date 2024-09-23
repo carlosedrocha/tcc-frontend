@@ -26,34 +26,38 @@ import { TaskCard } from './task-card';
 
 const defaultCols = [
   {
-    id: 'TODO' as const,
+    id: 'ORDER_PLACED' as const,
     title: 'A Fazer'
   },
   {
-    id: 'IN_PROGRESS' as const,
+    id: 'ORDER_IN_PROCESS' as const,
     title: 'Em Andamento'
   },
   {
-    id: 'DONE' as const,
+    id: 'ORDER_FINALIZED' as const,
     title: 'Finalizado'
   }
 ] satisfies Column[];
 
 export type ColumnId = (typeof defaultCols)[number]['id'];
 
-const initialTasks: Task[] = [
-  {
-    id: 'task1',
-    status: 'DONE',
-    title: 'Project initiation and planning'
-  },
-  {
-    id: 'task2',
-    status: 'DONE',
-    title: 'Gather requirements from stakeholders'
-  }
-];
-export function KanbanBoard() {
+// const initialTasks: Task[] = [
+//   {
+//     id: 'task1',
+//     status: 'DONE',
+//     title: 'Project initiation and planning'
+//   },
+//   {
+//     id: 'task2',
+//     status: 'DONE',
+//     title: 'Gather requirements from stakeholders'
+//   }
+// ];
+
+interface KanbanBoardProps {
+  data: Task[]; // ou qualquer outro tipo que você esteja passando
+}
+export function KanbanBoard({ data }: KanbanBoardProps) {
   // const [columns, setColumns] = useState<Column[]>(defaultCols);
   const columns = useTaskStore((state) => state.columns);
   const setColumns = useTaskStore((state) => state.setCols);
@@ -83,6 +87,7 @@ export function KanbanBoard() {
   useEffect(() => {
     useTaskStore.persist.rehydrate();
   }, []);
+
   if (!isMounted) return;
 
   function getDraggingTaskData(taskId: UniqueIdentifier, columnId: ColumnId) {
@@ -205,9 +210,10 @@ export function KanbanBoard() {
             <Fragment key={col.id}>
               <BoardColumn
                 column={col}
-                tasks={tasks.filter((task) => task.status === col.id)}
+                tasks={tasks.filter((task) => task.status === col.id)} // Você pode manter isso, se necessário
+                data={data} // Passando todos os dados
               />
-              {index === columns?.length - 1 && (
+              {index === columns.length - 1 && (
                 <div className="w-[300px]">
                   <NewSectionDialog />
                 </div>
@@ -226,6 +232,7 @@ export function KanbanBoard() {
                 isOverlay
                 column={activeColumn}
                 tasks={tasks.filter((task) => task.status === activeColumn.id)}
+                data={data}
               />
             )}
             {activeTask && <TaskCard task={activeTask} isOverlay />}
@@ -269,9 +276,9 @@ export function KanbanBoard() {
     if (!isActiveAColumn) return;
 
     const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
-
     const overColumnIndex = columns.findIndex((col) => col.id === overId);
 
+    // Mover a coluna
     setColumns(arrayMove(columns, activeColumnIndex, overColumnIndex));
   }
 

@@ -4,19 +4,19 @@ import { persist } from 'zustand/middleware';
 import { Column } from '@/components/kanban/board-column';
 import { UniqueIdentifier } from '@dnd-kit/core';
 
-export type Status = 'TODO' | 'IN_PROGRESS' | 'DONE';
+export type Status = 'ORDER_PLACED' | 'ORDER_IN_PROCESS' | 'ORDER_FINALIZED';
 
 const defaultCols = [
   {
-    id: 'TODO' as const,
+    id: 'ORDER_PLACED' as const,
     title: 'A Fazer'
   },
   {
-    id: 'IN_PROGRESS' as const,
+    id: 'ORDER_IN_PROCESS' as const,
     title: 'Em Andamento'
   },
   {
-    id: 'DONE' as const,
+    id: 'ORDER_FINALIZED' as const,
     title: 'Finalizado'
   }
 ] satisfies Column[];
@@ -57,9 +57,9 @@ export const useTaskStore = create<State & Actions>()(
         set((state) => ({
           tasks: [
             ...state.tasks,
-            { id: uuid(), title, description, status: 'TODO' },
-            { id: uuid(), title, description, status: 'IN_PROGRESS' },
-            { id: uuid(), title, description, status: 'DONE' }
+            { id: uuid(), title, description, status: 'ORDER_PLACED' },
+            { id: uuid(), title, description, status: 'ORDER_IN_PROCESS' },
+            { id: uuid(), title, description, status: 'ORDER_FINALIZED' }
           ]
         })),
       updateCol: (id: UniqueIdentifier, newName: string) =>
