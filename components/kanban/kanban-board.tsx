@@ -22,6 +22,7 @@ import type { Column } from './board-column';
 import { BoardColumn, BoardContainer } from './board-column';
 import NewSectionDialog from './new-section-dialog';
 import { TaskCard } from './task-card';
+import api from '@/app/api';
 // import { coordinateGetter } from "./multipleContainersKeyboardPreset";
 
 const defaultCols = [
@@ -57,6 +58,25 @@ export type ColumnId = (typeof defaultCols)[number]['id'];
 interface KanbanBoardProps {
   data: Task[]; // ou qualquer outro tipo que você esteja passando
 }
+
+export const updateTaskApi = async (taskId: string, status: string) => {
+  try {
+    const response = await api.put(`/kanban`, {
+      orderId: taskId,
+      status: status // Mantendo `id` e `status` no corpo da requisição
+    });
+
+    // Verifica se a resposta é bem-sucedida
+    if (response.status !== 200) {
+      throw new Error(`Failed to update task: ${response.statusText}`);
+    }
+
+    return response.data; // Retorne a tarefa atualizada, se necessário
+  } catch (error) {
+    console.error('Error updating task:', error);
+    throw error; // Propaga o erro para ser tratado onde a função for chamada
+  }
+};
 export function KanbanBoard({ data }: KanbanBoardProps) {
   // const [columns, setColumns] = useState<Column[]>(defaultCols);
   const columns = useTaskStore((state) => state.columns);
@@ -88,6 +108,12 @@ export function KanbanBoard({ data }: KanbanBoardProps) {
     useTaskStore.persist.rehydrate();
   }, []);
 
+  useEffect(() => {
+    if (data) {
+      setTasks(data);
+    }
+  }, [data, setTasks]);
+
   if (!isMounted) return;
 
   function getDraggingTaskData(taskId: UniqueIdentifier, columnId: ColumnId) {
@@ -99,6 +125,12 @@ export function KanbanBoard({ data }: KanbanBoardProps) {
       taskPosition,
       column
     };
+  }
+
+  function updateTaskStatus(taskId: string, newStatus: string) {
+    updateTaskApi(taskId, newStatus)
+      .then((response) => {})
+      .catch((error) => {});
   }
 
   const announcements: Announcements = {
@@ -114,7 +146,7 @@ export function KanbanBoard({ data }: KanbanBoardProps) {
         pickedUpTaskColumn.current = active.data.current.task.status;
         const { tasksInColumn, taskPosition, column } = getDraggingTaskData(
           active.id,
-          pickedUpTaskColumn.current
+          pickedUpTaskColumn.current ?? 'ORDER_PLACED'
         );
         return `Picked up Task ${active.data.current.task.title} at position: ${
           taskPosition + 1
@@ -162,12 +194,22 @@ export function KanbanBoard({ data }: KanbanBoardProps) {
         over.data.current?.type === 'Column'
       ) {
         const overColumnPosition = columnsId.findIndex((id) => id === over.id);
-
         return `Column ${
           active.data.current.column.title
         } was dropped into position ${overColumnPosition + 1} of ${
           columnsId.length
         }`;
+      } else if (
+        active.data.current?.type === 'Task' &&
+        over.data.current?.type === 'Column' // Alterado para verificar se a tarefa foi solta em uma coluna
+      ) {
+        const newStatus = over.data.current.column.status; // Obtenha o novo status da coluna
+        const taskId = String(active.id); // ID da tarefa
+
+        // Função que atualiza o status da tarefa
+        updateTaskStatus(taskId, newStatus); // Chame a função para atualizar o status
+
+        return `Task ${active.data.current.task.title} was dropped into column ${over.data.current.column.title}`;
       } else if (
         active.data.current?.type === 'Task' &&
         over.data.current?.type === 'Task'
@@ -235,7 +277,7 @@ export function KanbanBoard({ data }: KanbanBoardProps) {
                 data={data}
               />
             )}
-            {activeTask && <TaskCard task={activeTask} isOverlay />}
+            {activeTask && <TaskCard task={activeTask} isOverlay data={data} />}
           </DragOverlay>,
           document.body
         )}
@@ -270,10 +312,23 @@ export function KanbanBoard({ data }: KanbanBoardProps) {
 
     const activeData = active.data.current;
 
-    if (activeId === overId) return;
-
     const isActiveAColumn = activeData?.type === 'Column';
-    if (!isActiveAColumn) return;
+
+    if (!isActiveAColumn === true) {
+      const newStatus = over.data.current?.task?.status; // Obter o novo status da coluna
+
+      if (newStatus) {
+        // Chamar a função de atualização de status da tarefa
+        updateTaskStatus(String(activeId), newStatus);
+      } else {
+        console.warn('Column status não definido em over.data.current');
+      }
+    } else {
+      // Mover a coluna
+      const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
+      const overColumnIndex = columns.findIndex((col) => col.id === overId);
+      setColumns(arrayMove(columns, activeColumnIndex, overColumnIndex));
+    }
 
     const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
     const overColumnIndex = columns.findIndex((col) => col.id === overId);

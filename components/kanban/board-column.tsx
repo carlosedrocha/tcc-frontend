@@ -105,7 +105,7 @@ export function BoardColumn({
           {data
             .filter((task) => task.status === column.id)
             .map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} data={data} />
             ))}
         </SortableContext>
       </CardContent>
