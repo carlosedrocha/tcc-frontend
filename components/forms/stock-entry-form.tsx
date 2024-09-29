@@ -30,6 +30,7 @@ import { useToast } from '../ui/use-toast';
 // Define the new schema for stock entry
 const formSchema = z.object({
   quantity: z.number().min(1, { message: 'Quantidade é obrigatória' }),
+  itemId: z.string().min(1, { message: 'Item é obrigatório' }), // New field
   transaction: z.object({
     type: z.enum(['SALE', 'EXPENSE', 'INCOME', 'PAYMENT'], { required_error: 'Tipo de transação é obrigatório' }),
     description: z.string().min(1, { message: 'Descrição é obrigatória' }),
@@ -63,6 +64,7 @@ const useStockEntryData = (id) => {
         const data = response.data;
         initialDataRef.current = {
           quantity: data.quantity || 0,
+          itemId: data.itemId || '', // New field
           transaction: {
             type: data.transaction.type || 'SALE',
             description: data.transaction.description || '',
@@ -90,6 +92,32 @@ const useStockEntryData = (id) => {
   return { stockEntryData };
 };
 
+// New hook to fetch stock items
+const useStockItems = () => {
+  const { toast } = useToast();
+  const [stockItems, setStockItems] = useState([]);
+
+  useEffect(() => {
+    const fetchStockItems = async () => {
+      try {
+        const response = await api.get('/stock');
+        console.log(response.data)
+        setStockItems(response.data);
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao buscar itens de estoque',
+          description: 'Houve um problema ao buscar os itens, tente novamente mais tarde.',
+        });
+      }
+    };
+
+    fetchStockItems();
+  }, [toast]);
+
+  return stockItems;
+};
+
 export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) => {
   const params = useParams();
   const router = useRouter();
@@ -101,12 +129,15 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
   const { stockEntryData } = useStockEntryData(id);
   initialData = stockEntryData ? stockEntryData : initialData;
 
+  const stockItems = useStockItems(); // Fetch stock items
+
   const title = initialData ? 'Editar Entrada de Estoque' : 'Adicionar Entrada de Estoque';
   const toastMessage = initialData ? 'Entrada de Estoque Atualizada.' : 'Entrada de Estoque Criada.';
   const action = initialData ? 'Salvar' : 'Criar';
 
   const defaultValues = initialData ? initialData : {
     quantity: 1,
+    itemId: '', // New field
     transaction: {
       type: 'SALE',
       description: '',
@@ -133,10 +164,25 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
   const onSubmit = async (data: StockEntryFormValues) => {
     try {
       setLoading(true);
+      const payload = {
+        quantity: data.quantity,
+        transaction: {
+          type: data.transaction.type,
+          description: data.transaction.description,
+          amount: data.transaction.amount,
+          category: data.transaction.category,
+          status: data.transaction.status,
+          paymentMethod: data.transaction.paymentMethod,
+        },
+        movementType: data.movementType,
+        description: data.description,
+        itemId: data.itemId, // Include selected item ID
+      };
+
       if (id) {
-        await api.put(`/stock-entry/${id}`, data);
+        await api.put(`/stock-entry/${id}`, payload);
       } else {
-        await api.post(`/stock-entry`, data);
+        await api.post(`/stock-entry`, payload);
       }
       router.refresh();
       router.push('/dashboard/stock-entry');
@@ -171,6 +217,35 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
           <div className="gap-8 md:grid md:grid-cols-3">
+            {/* New Dropdown for Selecting Item */}
+            <FormField
+              control={form.control}
+              name="itemId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Selecione um Item</FormLabel>
+                  <FormControl>
+                    <Select
+                      disabled={loading}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue defaultValue={field.value} placeholder="Selecione um item" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {stockItems.map(stockItem => (
+                          <SelectItem key={stockItem.id} value={stockItem.id}>
+                            {stockItem.item.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="quantity"
@@ -191,46 +266,69 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
             />
             <FormField
               control={form.control}
-              name="transaction.type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo de Transação</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value ?? 'SALE'}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="SALE">Vendas</SelectItem>
-                      <SelectItem value="EXPENSE">Despesas</SelectItem>
-                      <SelectItem value="INCOME">Recebimentos</SelectItem>
-                      <SelectItem value="PAYMENT">Pagamentos</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <Separator />
-          <div className="gap-8 md:grid md:grid-cols-3">
-            <FormField
-              control={form.control}
-              name="transaction.description"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
-                      placeholder="Descrição da transação"
+                      placeholder="Descrição da entrada"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="gap-8 md:grid md:grid-cols-3">
+            <FormField
+              control={form.control}
+              name="movementType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Movimentação</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue defaultValue={field.value} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ENTRY">Entrada</SelectItem>
+                        <SelectItem value="EXIT">Saída</SelectItem>
+                        <SelectItem value="ADJUSTMENT">Ajuste</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="transaction.type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Transação</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue defaultValue={field.value} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SALE">Venda</SelectItem>
+                        <SelectItem value="EXPENSE">Despesa</SelectItem>
+                        <SelectItem value="INCOME">Renda</SelectItem>
+                        <SelectItem value="PAYMENT">Pagamento</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -254,60 +352,57 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                 </FormItem>
               )}
             />
+          </div>
+          <div className="gap-8 md:grid md:grid-cols-3">
             <FormField
               control={form.control}
               name="transaction.category"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Categoria</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value ?? 'OTHER'}
-                  >
-                    <FormControl>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Selecione" />
+                        <SelectValue defaultValue={field.value} />
                       </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="FOOD">Alimentação</SelectItem>
-                      <SelectItem value="SALARY">Salário</SelectItem>
-                      <SelectItem value="STOCK">Estoque</SelectItem>
-                      <SelectItem value="BILLS">Contas</SelectItem>
-                      <SelectItem value="MAINTENANCE">Manutenção</SelectItem>
-                      <SelectItem value="OTHER">Outro</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectContent>
+                        <SelectItem value="FOOD">Alimentação</SelectItem>
+                        <SelectItem value="SALARY">Salário</SelectItem>
+                        <SelectItem value="STOCK">Estoque</SelectItem>
+                        <SelectItem value="BILLS">Contas</SelectItem>
+                        <SelectItem value="MAINTENANCE">Manutenção</SelectItem>
+                        <SelectItem value="OTHER">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-          <Separator />
-          <div className="gap-8 md:grid md:grid-cols-3">
             <FormField
               control={form.control}
               name="transaction.status"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value ?? 'PENDING'}
-                  >
-                    <FormControl>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Selecione" />
+                        <SelectValue defaultValue={field.value} />
                       </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="PENDING">Pendente</SelectItem>
-                      <SelectItem value="PAID">Pago</SelectItem>
-                      <SelectItem value="CANCELED">Cancelado</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectContent>
+                        <SelectItem value="PENDING">Pendente</SelectItem>
+                        <SelectItem value="PAID">Pago</SelectItem>
+                        <SelectItem value="CANCELED">Cancelado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -318,73 +413,29 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Método de Pagamento</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value ?? 'CASH'}
-                  >
-                    <FormControl>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Selecione" />
+                        <SelectValue defaultValue={field.value} />
                       </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="CASH">Dinheiro</SelectItem>
-                      <SelectItem value="CREDIT_CARD">Cartão de Crédito</SelectItem>
-                      <SelectItem value="DEBIT_CARD">Cartão de Débito</SelectItem>
-                      <SelectItem value="PIX">PIX</SelectItem>
-                      <SelectItem value="TRANSFER">Transferência</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="movementType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo de Movimentação</FormLabel>
-                  <Select
-                    disabled={loading}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value ?? 'ENTRY'}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="ENTRY">Entrada</SelectItem>
-                      <SelectItem value="EXIT">Saída</SelectItem>
-                      <SelectItem value="ADJUSTMENT">Ajuste</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectContent>
+                        <SelectItem value="CASH">Dinheiro</SelectItem>
+                        <SelectItem value="CREDIT_CARD">Cartão de Crédito</SelectItem>
+                        <SelectItem value="DEBIT_CARD">Cartão de Débito</SelectItem>
+                        <SelectItem value="PIX">PIX</SelectItem>
+                        <SelectItem value="TRANSFER">Transferência</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descrição da Entrada</FormLabel>
-                <FormControl>
-                  <Input
-                    disabled={loading}
-                    placeholder="Descrição detalhada"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button disabled={loading} className="ml-auto" type="submit">
+          <Button disabled={loading} type="submit">
             {action}
           </Button>
         </form>
