@@ -212,6 +212,12 @@ export const navItems: NavItem[] = [
     icon: 'employee',
     label: 'employee'
   },
+  {
+    title: 'Entrada Estoque',
+    href: '/dashboard/stock',
+    icon: 'sandwich',
+    label: 'sandwich'
+  },
   // {
   //   title: 'Mudar o',
   //   href: '/dashboard/profile',
