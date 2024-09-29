@@ -29,11 +29,11 @@ export default function NewSectionDialog() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      {/* <DialogTrigger asChild>
         <Button variant="secondary" size="lg" className="w-full">
           ＋ Add New Section
         </Button>
-      </DialogTrigger>
+      </DialogTrigger> */}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add New Section</DialogTitle>

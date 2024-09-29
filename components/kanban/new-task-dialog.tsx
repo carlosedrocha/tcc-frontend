@@ -31,11 +31,11 @@ export default function NewTaskDialog() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      {/* <DialogTrigger asChild>
         <Button variant="secondary" size="sm">
           ＋ Add New Todo
         </Button>
-      </DialogTrigger>
+      </DialogTrigger> */}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add New Todo</DialogTitle>
