@@ -1,31 +1,27 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Task } from '@/lib/store';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cva } from 'class-variance-authority';
 import { GripVertical } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
-// export interface Task {
-//   id: UniqueIdentifier;
-//   columnId: ColumnId;
-//   content: string;
-// }
-
 interface TaskCardProps {
-  task: Task;
+  task: {
+    id: string;
+    status: string;
+    dishesOrder: {
+      dish: {
+        name: string;
+      };
+    }[];
+    title?: string; // Torne 'title' opcional
+  };
   isOverlay?: boolean;
+  data: any[]; // Ou substitua por um tipo mais específico se necessário
 }
 
-export type TaskType = 'Task';
-
-export interface TaskDragData {
-  type: TaskType;
-  task: Task;
-}
-
-export function TaskCard({ task, isOverlay }: TaskCardProps) {
+export function TaskCard({ task, isOverlay, data }: TaskCardProps) {
   const {
     setNodeRef,
     attributes,
@@ -38,7 +34,7 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
     data: {
       type: 'Task',
       task
-    } satisfies TaskDragData,
+    },
     attributes: {
       roleDescription: 'Task'
     }
@@ -81,7 +77,12 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
         </Badge>
       </CardHeader>
       <CardContent className="whitespace-pre-wrap px-3 pb-6 pt-3 text-left">
-        {task.title}
+        <ul>
+          {task.dishesOrder.map((order, index) => (
+            <li key={index}>{order.dish.name}</li> // Exibindo o nome do prato
+          ))}
+        </ul>
+        {/* Você pode usar a propriedade data aqui, se necessário */}
       </CardContent>
     </Card>
   );

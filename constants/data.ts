@@ -167,26 +167,26 @@ export const navItems: NavItem[] = [
   {
     title: 'Tipo de Item',
     href: '/dashboard/item-type',
-    icon: 'sandwich',
-    label: 'item-type'
+    icon: 'clipboardList',
+    label: 'clipboardList'
   },
   {
     title: 'Item',
     href: '/dashboard/item',
-    icon: 'sandwich',
-    label: 'sandwich'
+    icon: 'beef',
+    label: 'beef'
   },
   {
     title: 'Categoria de Pratos',
     href: '/dashboard/category-dish',
-    icon: 'sandwich',
-    label: 'sandwich'
+    icon: 'scrollText',
+    label: 'scrollText'
   },
   {
     title: 'Pratos',
     href: '/dashboard/dish',
-    icon: 'sandwich',
-    label: 'sandwich'
+    icon: 'utensils',
+    label: 'utensils'
   },
   {
     title: 'Cardápio',
@@ -224,12 +224,12 @@ export const navItems: NavItem[] = [
   //   icon: 'profile',
   //   label: 'profile'
   // },
-  // {
-  //   title: 'Kanban',
-  //   href: '/dashboard/kanban',
-  //   icon: 'kanban',
-  //   label: 'kanban'
-  // },
+  {
+    title: 'Kanban',
+    href: '/dashboard/kanban',
+    icon: 'kanban',
+    label: 'kanban'
+  },
   {
     title: 'Login',
     href: '/',
