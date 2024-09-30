@@ -27,10 +27,10 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useToast } from '../ui/use-toast';
 
-// Define the new schema for stock entry
+// Definição do schema para validação dos campos
 const formSchema = z.object({
   quantity: z.number().min(1, { message: 'Quantidade é obrigatória' }),
-  itemId: z.string().min(1, { message: 'Item é obrigatório' }), // New field
+  itemId: z.string().min(1, { message: 'Item é obrigatório' }), // Campo itemId
   transaction: z.object({
     type: z.enum(['SALE', 'EXPENSE', 'INCOME', 'PAYMENT'], { required_error: 'Tipo de transação é obrigatório' }),
     description: z.string().min(1, { message: 'Descrição é obrigatória' }),
@@ -49,6 +49,7 @@ interface StockEntryFormProps {
   initialData: any | null;
 }
 
+// Hook para buscar dados da entrada de estoque
 const useStockEntryData = (id) => {
   const { toast } = useToast();
   const [stockEntryData, setStockEntryData] = useState();
@@ -60,11 +61,11 @@ const useStockEntryData = (id) => {
         if (!id) {
           return;
         }
-        const response = await api.get(`/stock-entry/${id}`);
+        const response = await api.get(`/stock-movement/entry/${id}`);
         const data = response.data;
         initialDataRef.current = {
           quantity: data.quantity || 0,
-          itemId: data.itemId || '', // New field
+          itemId: data.itemId || '',
           transaction: {
             type: data.transaction.type || 'SALE',
             description: data.transaction.description || '',
@@ -92,7 +93,7 @@ const useStockEntryData = (id) => {
   return { stockEntryData };
 };
 
-// New hook to fetch stock items
+// Hook para buscar os itens de estoque
 const useStockItems = () => {
   const { toast } = useToast();
   const [stockItems, setStockItems] = useState([]);
@@ -101,7 +102,6 @@ const useStockItems = () => {
     const fetchStockItems = async () => {
       try {
         const response = await api.get('/stock');
-        console.log(response.data)
         setStockItems(response.data);
       } catch (error) {
         toast({
@@ -129,7 +129,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
   const { stockEntryData } = useStockEntryData(id);
   initialData = stockEntryData ? stockEntryData : initialData;
 
-  const stockItems = useStockItems(); // Fetch stock items
+  const stockItems = useStockItems(); // Itens de estoque
 
   const title = initialData ? 'Editar Entrada de Estoque' : 'Adicionar Entrada de Estoque';
   const toastMessage = initialData ? 'Entrada de Estoque Atualizada.' : 'Entrada de Estoque Criada.';
@@ -137,7 +137,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
 
   const defaultValues = initialData ? initialData : {
     quantity: 1,
-    itemId: '', // New field
+    itemId: '',
     transaction: {
       type: 'SALE',
       description: '',
@@ -164,28 +164,26 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
   const onSubmit = async (data: StockEntryFormValues) => {
     try {
       setLoading(true);
+      console.log(data)
       const payload = {
-        quantity: data.quantity,
+        quantity: Number(data.quantity),
         transaction: {
           type: data.transaction.type,
           description: data.transaction.description,
-          amount: data.transaction.amount,
+          amount: Number(data.transaction.amount),
           category: data.transaction.category,
           status: data.transaction.status,
           paymentMethod: data.transaction.paymentMethod,
         },
         movementType: data.movementType,
         description: data.description,
-        itemId: data.itemId, // Include selected item ID
+        id: data.itemId,
       };
 
-      if (id) {
-        await api.put(`/stock-entry/${id}`, payload);
-      } else {
-        await api.post(`/stock-entry`, payload);
-      }
+      await api.post(`/stock-movement/entry/${data.itemId}`, payload);
+      
       router.refresh();
-      router.push('/dashboard/stock-entry');
+      router.push('/dashboard/stock');
       toast({ title: toastMessage });
     } catch (error: any) {
       toast({
@@ -207,7 +205,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
             disabled={loading}
             variant="destructive"
             size="sm"
-            onClick={() => {/* Aqui você pode implementar a lógica de exclusão se necessário */}}
+            onClick={() => {/* Lógica de exclusão */}}
           >
             <Trash className="h-4 w-4" />
           </Button>
@@ -217,7 +215,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
           <div className="gap-8 md:grid md:grid-cols-3">
-            {/* New Dropdown for Selecting Item */}
+            {/* Campo para selecionar o item */}
             <FormField
               control={form.control}
               name="itemId"
@@ -234,9 +232,9 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                         <SelectValue defaultValue={field.value} placeholder="Selecione um item" />
                       </SelectTrigger>
                       <SelectContent>
-                        {stockItems.map(stockItem => (
-                          <SelectItem key={stockItem.id} value={stockItem.id}>
-                            {stockItem.item.name}
+                        {stockItems.map((stockEntry) => (
+                          <SelectItem key={stockEntry.id} value={stockEntry.id}>
+                            {stockEntry.item.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -246,6 +244,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                 </FormItem>
               )}
             />
+            {/* Quantidade */}
             <FormField
               control={form.control}
               name="quantity"
@@ -254,27 +253,10 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                   <FormLabel>Quantidade</FormLabel>
                   <FormControl>
                     <Input
+                      disabled={loading}
                       type="number"
-                      disabled={loading}
-                      placeholder="100"
                       {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição</FormLabel>
-                  <FormControl>
-                    <Input
-                      disabled={loading}
-                      placeholder="Descrição da entrada"
-                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))} // Converter para número
                     />
                   </FormControl>
                   <FormMessage />
@@ -282,32 +264,11 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
               )}
             />
           </div>
+          <Separator />
+          <Heading title="Informações da Transação" description="Detalhes da transação financeira" />
+          {/* Campos da transação */}
           <div className="gap-8 md:grid md:grid-cols-3">
-            <FormField
-              control={form.control}
-              name="movementType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo de Movimentação</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue defaultValue={field.value} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ENTRY">Entrada</SelectItem>
-                        <SelectItem value="EXIT">Saída</SelectItem>
-                        <SelectItem value="ADJUSTMENT">Ajuste</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Tipo de transação */}
             <FormField
               control={form.control}
               name="transaction.type"
@@ -316,16 +277,17 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                   <FormLabel>Tipo de Transação</FormLabel>
                   <FormControl>
                     <Select
+                      disabled={loading}
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} />
+                        <SelectValue placeholder="Selecione um tipo" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="SALE">Venda</SelectItem>
                         <SelectItem value="EXPENSE">Despesa</SelectItem>
-                        <SelectItem value="INCOME">Renda</SelectItem>
+                        <SelectItem value="INCOME">Receita</SelectItem>
                         <SelectItem value="PAYMENT">Pagamento</SelectItem>
                       </SelectContent>
                     </Select>
@@ -334,6 +296,25 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                 </FormItem>
               )}
             />
+            {/* Descrição da transação */}
+            <FormField
+              control={form.control}
+              name="transaction.description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição da Transação</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Descrição"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Valor */}
             <FormField
               control={form.control}
               name="transaction.amount"
@@ -342,18 +323,17 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                   <FormLabel>Valor</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
                       disabled={loading}
-                      placeholder="0.00"
+                      type="number"
                       {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-          <div className="gap-8 md:grid md:grid-cols-3">
+            {/* Categoria */}
             <FormField
               control={form.control}
               name="transaction.category"
@@ -362,11 +342,12 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                   <FormLabel>Categoria</FormLabel>
                   <FormControl>
                     <Select
+                      disabled={loading}
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} />
+                        <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="FOOD">Alimentação</SelectItem>
@@ -374,7 +355,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                         <SelectItem value="STOCK">Estoque</SelectItem>
                         <SelectItem value="BILLS">Contas</SelectItem>
                         <SelectItem value="MAINTENANCE">Manutenção</SelectItem>
-                        <SelectItem value="OTHER">Outros</SelectItem>
+                        <SelectItem value="OTHER">Outro</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -382,6 +363,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                 </FormItem>
               )}
             />
+            {/* Status */}
             <FormField
               control={form.control}
               name="transaction.status"
@@ -390,11 +372,12 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                   <FormLabel>Status</FormLabel>
                   <FormControl>
                     <Select
+                      disabled={loading}
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} />
+                        <SelectValue placeholder="Selecione um status" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="PENDING">Pendente</SelectItem>
@@ -407,6 +390,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                 </FormItem>
               )}
             />
+            {/* Método de Pagamento */}
             <FormField
               control={form.control}
               name="transaction.paymentMethod"
@@ -415,11 +399,12 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                   <FormLabel>Método de Pagamento</FormLabel>
                   <FormControl>
                     <Select
+                      disabled={loading}
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} />
+                        <SelectValue placeholder="Selecione um método" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="CASH">Dinheiro</SelectItem>
@@ -429,6 +414,56 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                         <SelectItem value="TRANSFER">Transferência</SelectItem>
                       </SelectContent>
                     </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <Separator />
+          <Heading title="Movimentação de Estoque" description="Detalhes da movimentação" />
+          {/* Movimento de Estoque */}
+          <div className="gap-8 md:grid md:grid-cols-3">
+            {/* Tipo de Movimentação */}
+            <FormField
+              control={form.control}
+              name="movementType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Movimentação</FormLabel>
+                  <FormControl>
+                    <Select
+                      disabled={loading}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um tipo de movimentação" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ENTRY">Entrada</SelectItem>
+                        <SelectItem value="EXIT">Saída</SelectItem>
+                        <SelectItem value="ADJUSTMENT">Ajuste</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Descrição da movimentação */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição da Movimentação</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Descrição"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
