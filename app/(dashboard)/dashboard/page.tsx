@@ -173,6 +173,30 @@ export default function page() {
               </form>
             </CardContent>
           </Card>
+          <Card className="w-[350px]">
+            <CardHeader>
+              <CardTitle>Cadastre os gastos</CardTitle>
+              <CardDescription>Realize o cadastro dos gastos.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form>
+                <div className="grid w-full items-center gap-4">
+                  <div className="flex flex-col space-y-1.5">
+                    <Label htmlFor="name" className="mb-2">
+                      Gastos
+                    </Label>
+                    <Link
+                      href={'/dashboard/expense'}
+                      className={cn(buttonVariants({ variant: 'default' }))}
+                    >
+                      Ir para a pagina
+                    </Link>
+                  </div>
+                  <div className="flex flex-col space-y-1.5"></div>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
         {/* <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">
