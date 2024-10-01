@@ -36,7 +36,9 @@ import {
   Utensils,
   Beef,
   ScrollText,
-  ClipboardList
+  ClipboardList,
+  ConciergeBell,
+  LogOut
 } from 'lucide-react';
 
 export type Icon = LucideIcon;
@@ -76,6 +78,8 @@ export const Icons = {
   beef: Beef,
   scrollText: ScrollText,
   clipboardList: ClipboardList,
+  conciergeBell:ConciergeBell,
+  logout:LogOut,
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

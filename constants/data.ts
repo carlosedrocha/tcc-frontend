@@ -231,10 +231,16 @@ export const navItems: NavItem[] = [
     label: 'kanban'
   },
   {
-    title: 'Login',
+    title: 'Logout',
     href: '/',
-    icon: 'login',
-    label: 'login'
+    icon: 'logout',
+    label: 'logout'
+  },
+  {
+    title: 'Campainha',
+    href: '/dashboard/waiter-bell',
+    icon: 'conciergeBell',
+    label: 'bell'
   }
 ];
 
