@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
+import { SessionProvider } from './contexts/SessionContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,10 +27,10 @@ export default async function RootLayout({
       <body className={`${inter.className} overflow-hidden`}>
         <NextTopLoader />
         {/* <Providers session={session}> */}
-        <Providers session={null}>
+        <SessionProvider>
           <Toaster />
           {children}
-        </Providers>
+        </SessionProvider>
       </body>
     </html>
   );
