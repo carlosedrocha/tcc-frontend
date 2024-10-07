@@ -231,17 +231,17 @@ export const navItems: NavItem[] = [
     label: 'kanban'
   },
   {
+    title: 'Campainha',
+    href: '/dashboard/waiter-bell',
+    icon: 'conciergeBell',
+    label: 'bell'
+  },
+  {
     title: 'Logout',
     href: '/',
     icon: 'logout',
     label: 'logout'
   },
-  {
-    title: 'Campainha',
-    href: '/dashboard/waiter-bell',
-    icon: 'conciergeBell',
-    label: 'bell'
-  }
 ];
 
 export type ItemTypeT = {
