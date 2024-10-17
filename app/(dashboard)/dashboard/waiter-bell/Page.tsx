@@ -83,31 +83,36 @@ export default function Page() {
       setConnected(true);
       console.log('Conectado ao servidor WebSocket');
     });
+        // Recebe a resposta do servidor WebSocket
+    socket.on('waiterNotification', (data: string) => {
+      // Adiciona a nova mensagem à lista
+      setTables((prevMessages) => [...prevMessages, data]);
+    });
 
     // Simulando as mesas abertas (substitua isso pela lógica real para obter as mesas)
-    setTables([
-      {
-        id: '1',
-        tabNumber: 1,
-        customer: 'Carlos',
-        status: 'Aberto',
-        orders: ['Pedido 1', 'Pedido 2'], // Adicione pedidos simulados
-      },
-      {
-        id: '2',
-        tabNumber: 2,
-        customer: 'Maria',
-        status: 'Aberto',
-        orders: ['Pedido 3', 'Pedido 4'], // Adicione pedidos simulados
-      },
-      {
-        id: '3',
-        tabNumber: 3,
-        customer: 'João',
-        status: 'Aberto',
-        orders: [], // Mesa sem pedidos
-      },
-    ]);
+    // setTables([
+    //   {
+    //     id: '1',
+    //     tabNumber: 1,
+    //     customer: 'Carlos',
+    //     status: 'Aberto',
+    //     orders: ['Pedido 1', 'Pedido 2'], // Adicione pedidos simulados
+    //   },
+    //   {
+    //     id: '2',
+    //     tabNumber: 2,
+    //     customer: 'Maria',
+    //     status: 'Aberto',
+    //     orders: ['Pedido 3', 'Pedido 4'], // Adicione pedidos simulados
+    //   },
+    //   {
+    //     id: '3',
+    //     tabNumber: 3,
+    //     customer: 'João',
+    //     status: 'Aberto',
+    //     orders: [], // Mesa sem pedidos
+    //   },
+    // ]);
 
     // Desconectar o socket quando o componente for desmontado
     return () => {
@@ -128,39 +133,12 @@ export default function Page() {
       <h1>Mesas Abertas:</h1>
       <br />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tables.map((table) => (
-          <Card key={table.id} className="shadow-md h-auto transition-height duration-300 ease-in-out">
-            <CardHeader>
-              <CardTitle>Comanda Mesa {table.tabNumber}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>Cliente: {table.customer}</CardDescription>
-              <CardDescription>Status: {table.status}</CardDescription>
-
-              {/* Accordion para mostrar os pedidos realizados */}
-              <Accordion type="single" collapsible>
-                <AccordionItem value={table.id}>
-                  <AccordionTrigger onClick={() => toggleAccordion(table.id)}>
-                    <span>Ver Pedidos</span>
-                  </AccordionTrigger>
-                  {expandedItems.includes(table.id) && (
-                    <AccordionContent>
-                      {table.orders.length > 0 ? (
-                        <ul>
-                          {table.orders.map((order, index) => (
-                            <li key={index}>{order}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p>Nenhum pedido realizado</p>
-                      )}
-                    </AccordionContent>
-                  )}
-                </AccordionItem>
-              </Accordion>
-            </CardContent>
-          </Card>
-        ))}
+        <div className="mt-2 p-4 rounded h-64 overflow-y-auto">
+          {tables.map((message, index) => (
+            <p className='pt-3' key={index}>{message}</p>
+          ))}
+        </div>
+        
       </div>
     </div>
   );
