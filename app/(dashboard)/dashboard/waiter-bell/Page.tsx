@@ -1,79 +1,18 @@
-// 'use client';
-// import { useEffect, useState } from 'react';
-// import io from 'socket.io-client';
-
-// let socket: ReturnType<typeof io> | null = null;
-
-// export default function Page() {
-//   const [connected, setConnected] = useState(false);
-//   const [messages, setMessages] = useState<string[]>([]); // Lista de mensagens
-
-//   useEffect(() => {
-//     // Conectar ao WebSocket Gateway do NestJS quando o componente carregar
-//     socket = io('http://localhost:3333');
-
-//     socket.on('connect', () => {
-//       setConnected(true);
-//       console.log('Conectado ao servidor WebSocket');
-//     });
-
-//     // Recebe a resposta do servidor WebSocket
-//     socket.on('waiterNotification', (data: string) => {
-//       // Adiciona a nova mensagem à lista
-//       setMessages((prevMessages) => [...prevMessages, data]);
-//     });
-
-//     // Desconectar o socket quando o componente for desmontado
-//     return () => {
-//       if (socket) {
-//         socket.disconnect();
-//       }
-//     };
-//   }, []); // O array vazio faz o efeito rodar apenas uma vez, quando o componente monta
-
-//   return (
-//     <div className="p-4">
-//       <div>
-//         <h1>Mesas:</h1>
-
-//         <div className="mt-2 p-4 rounded h-64 overflow-y-auto">
-//           {messages.map((message, index) => (
-//             <p className='pt-3' key={index}>{message}</p>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-///// falta finalizar em cima, estou colocando o código em baixo com dados mock
 'use client';
 import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
-
-// Importe os componentes de UI da Shadcn que você está usando
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { BellRing, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 
 let socket: ReturnType<typeof io> | null = null;
 
 export default function Page() {
   const [connected, setConnected] = useState(false);
-  const [tables, setTables] = useState<any[]>([]); // Lista de mesas
-  const [expandedItems, setExpandedItems] = useState<string[]>([]); // Estado para itens expandidos
+  const [notifications, setNotifications] = useState<{ title: string, description: string, read: boolean }[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0); // Estado para o contador de novas notificações
 
   useEffect(() => {
     // Conectar ao WebSocket Gateway do NestJS quando o componente carregar
@@ -83,36 +22,19 @@ export default function Page() {
       setConnected(true);
       console.log('Conectado ao servidor WebSocket');
     });
-        // Recebe a resposta do servidor WebSocket
-    socket.on('waiterNotification', (data: string) => {
-      // Adiciona a nova mensagem à lista
-      setTables((prevMessages) => [...prevMessages, data]);
-    });
 
-    // Simulando as mesas abertas (substitua isso pela lógica real para obter as mesas)
-    // setTables([
-    //   {
-    //     id: '1',
-    //     tabNumber: 1,
-    //     customer: 'Carlos',
-    //     status: 'Aberto',
-    //     orders: ['Pedido 1', 'Pedido 2'], // Adicione pedidos simulados
-    //   },
-    //   {
-    //     id: '2',
-    //     tabNumber: 2,
-    //     customer: 'Maria',
-    //     status: 'Aberto',
-    //     orders: ['Pedido 3', 'Pedido 4'], // Adicione pedidos simulados
-    //   },
-    //   {
-    //     id: '3',
-    //     tabNumber: 3,
-    //     customer: 'João',
-    //     status: 'Aberto',
-    //     orders: [], // Mesa sem pedidos
-    //   },
-    // ]);
+    // Receber notificações do WebSocket
+    socket.on('waiterNotification', (data: string) => {
+      const newNotification = {
+        title: data,
+        description: "Agora mesmo", // Tempo mock, você pode adaptar para tempo real
+        read: false, // Nova notificação começa como não lida
+      };
+
+      // Adiciona a nova notificação no início da lista
+      setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
+      setUnreadCount((prevCount) => prevCount + 1); // Incrementa o contador de novas notificações
+    });
 
     // Desconectar o socket quando o componente for desmontado
     return () => {
@@ -120,26 +42,72 @@ export default function Page() {
         socket.disconnect();
       }
     };
-  }, []); // O array vazio faz o efeito rodar apenas uma vez, quando o componente monta
+  }, []);
 
-  const toggleAccordion = (id: string) => {
-    setExpandedItems((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+  const markAllAsRead = () => {
+    // Atualiza o estado das notificações para lidas
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notification) => ({ ...notification, read: true }))
     );
+    setUnreadCount(0); // Reseta o contador de novas notificações
   };
 
   return (
     <div className="p-4">
-      <h1>Mesas Abertas:</h1>
-      <br />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="mt-2 p-4 rounded h-64 overflow-y-auto">
-          {tables.map((message, index) => (
-            <p className='pt-3' key={index}>{message}</p>
+      {/* <h1>Mesas Abertas:</h1>
+      <br /> */}
+      <CardDemo notifications={notifications} markAllAsRead={markAllAsRead} unreadCount={unreadCount} />
+    </div>
+  );
+}
+
+type CardProps = React.ComponentProps<typeof Card> & {
+  notifications: { title: string, description: string, read: boolean }[];
+  markAllAsRead: () => void;
+  unreadCount: number; // Adicionado o contador de novas notificações
+};
+
+function CardDemo({ className, notifications, markAllAsRead, unreadCount, ...props }: CardProps) {
+  // Limita o número de notificações exibidas
+  const displayedNotifications = notifications.slice(0, 5); // Exibe apenas as 5 notificações mais recentes
+
+  return (
+    <Card className={cn("w-[380px]", className)} {...props}>
+      <CardHeader>
+        <CardTitle>Notificações</CardTitle>
+        <CardDescription>{unreadCount} novas notificações.</CardDescription> {/* Exibe o contador de novas notificações */}
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div>
+          {displayedNotifications.map((notification, index) => (
+            <div
+              key={index}
+              className="mb-4 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
+            >
+              {/* A bola azul só é exibida se a notificação não foi lida */}
+              <span
+                className={cn(
+                  "flex h-2 w-2 translate-y-1 rounded-full bg-sky-500",
+                  notification.read && "invisible"
+                )}
+              />
+              <div className="space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {notification.title}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {notification.description}
+                </p>
+              </div>
+            </div>
           ))}
         </div>
-        
-      </div>
-    </div>
+      </CardContent>
+      <CardFooter>
+        <Button className="w-full" onClick={markAllAsRead}>
+          <Check className="mr-2 h-4 w-4" /> Marcar todas como lidas
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
