@@ -15,6 +15,14 @@ export default function Page() {
   const [unreadCount, setUnreadCount] = useState(0); // Estado para o contador de novas notificações
 
   useEffect(() => {
+    // Carregar notificações do localStorage ao montar o componente
+    const storedNotifications = localStorage.getItem('notifications');
+    if (storedNotifications) {
+      const parsedNotifications = JSON.parse(storedNotifications);
+      setNotifications(parsedNotifications);
+      setUnreadCount(parsedNotifications.filter((n: any) => !n.read).length); // Atualiza o contador de novas notificações
+    }
+
     // Conectar ao WebSocket Gateway do NestJS quando o componente carregar
     socket = io('http://localhost:3333');
 
@@ -32,7 +40,11 @@ export default function Page() {
       };
 
       // Adiciona a nova notificação no início da lista
-      setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
+      setNotifications((prevNotifications) => {
+        const updatedNotifications = [newNotification, ...prevNotifications];
+        localStorage.setItem('notifications', JSON.stringify(updatedNotifications)); // Salva as notificações no localStorage
+        return updatedNotifications;
+      });
       setUnreadCount((prevCount) => prevCount + 1); // Incrementa o contador de novas notificações
     });
 
@@ -45,11 +57,12 @@ export default function Page() {
   }, []);
 
   const markAllAsRead = () => {
-    // Atualiza o estado das notificações para lidas
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((notification) => ({ ...notification, read: true }))
-    );
+    // Limpa as notificações na tela
+    setNotifications([]);
     setUnreadCount(0); // Reseta o contador de novas notificações
+
+    // Limpa as notificações do localStorage
+    localStorage.removeItem('notifications');
   };
 
   return (
