@@ -15,7 +15,6 @@ import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import GoogleSignInButton from '../github-auth-button';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Enter a valid email address' }),
@@ -41,6 +40,7 @@ export default function UserAuthForm() {
 
   const onSubmit = async (data: UserFormValue) => {
     localStorage.clear();
+    sessionStorage.clear();
     try {
       setLoading(true);
       const response = await api.post('/auth/local/signin', data);
@@ -51,9 +51,24 @@ export default function UserAuthForm() {
         const token = response.data.bearer_token;
         //const name = response.data.user.name;
         const userId = response.data.userId;
+
+        const email = response.data?.user?.email;
+
+        const name = `${response.data?.user?.entity?.firstName} ${response.data?.user?.entity?.lastName}`;
+
+        const role = response.data?.user?.role?.name;
+
+        const permissions = response.data?.user?.role?.permissions;
+
         sessionStorage.setItem('token', JSON.stringify(token));
         //sessionStorage.setItem('name', JSON.stringify(name));
         sessionStorage.setItem('userId', JSON.stringify(userId));
+        //sessionStorage.setItem('email', JSON.stringify(data.email));
+         sessionStorage.setItem('email', JSON.stringify(email));
+        sessionStorage.setItem('name', JSON.stringify(name));
+        sessionStorage.setItem('role', JSON.stringify(role));
+        sessionStorage.setItem('permissions', JSON.stringify(permissions));
+
         window.location.href = '/dashboard';
       }
 
