@@ -199,7 +199,7 @@ export const DishForm: React.FC<DishFormProps> = ({
           // imgUrl: data.imgUrl,
           photoUrl: data.photoUrl ?? null,
           items: data.items,
-          preparationMethod: data.preparationMethod // Inclui o método de preparo aqui
+          recipe: data.preparationMethod // Inclui o método de preparo aqui
         });
         router.refresh();
         router.push(`/dashboard/dish`);
@@ -219,7 +219,7 @@ export const DishForm: React.FC<DishFormProps> = ({
             id: item.id,
             quantity: parseInt(item.quantity.toString())
           })),
-          preparationMethod: data.preparationMethod // Inclui o método de preparo aqui
+          recipe: data.preparationMethod // Inclui o método de preparo aqui
         });
         router.refresh();
         router.push(`/dashboard/dish`);
