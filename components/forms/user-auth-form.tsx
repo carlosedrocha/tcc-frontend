@@ -15,7 +15,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import { useSession } from '@/app/contexts/SessionContext'
 import { useRouter } from 'next/navigation'
 
 const formSchema = z.object({
@@ -29,7 +28,6 @@ type UserFormValue = z.infer<typeof formSchema>
 
 export default function UserAuthForm() {
   const [loading, setLoading] = useState(false)
-  const { setUser } = useSession()
   const router = useRouter()
 
   const defaultValues = {
@@ -48,12 +46,26 @@ export default function UserAuthForm() {
       const response = await api.post('/auth/local/signin', data)
       if (response.status === 200) {
         console.log(response.data)
-        const { userId, name, email } = response.data
-        const user = { userId, name, email }
-        setUser(user)
-        localStorage.setItem('user', JSON.stringify(user))
+      
+        // Extrair os dados relevantes do response
+        const { user } = response.data
+        const { id: userId, email, entity } = user
+        const { firstName, lastName } = entity
+      
+        // Criar o objeto 'user'
+        const userData = {
+          userId,
+          name: `${firstName} ${lastName}`, // Concatena o nome completo
+          email
+        }
+      
+        // Armazenar o usuário no estado e localStorage
+        localStorage.setItem('user', JSON.stringify(userData))
+      
+        // Redirecionar para o dashboard
         router.push('/dashboard')
       }
+      
     } catch (error) {
       console.error(error)
     } finally {
