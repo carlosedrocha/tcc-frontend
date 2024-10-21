@@ -29,6 +29,7 @@ import {
   SelectValue
 } from '../ui/select';
 import { useToast } from '../ui/use-toast';
+import { Textarea } from '../ui/textarea';
 
 const ImgSchema = z.object({
   fileName: z.string(),
@@ -47,9 +48,6 @@ const formSchema = z.object({
   name: z
     .string()
     .min(3, { message: 'Dish Name must be at least 3 characters' }),
-  // imgUrl: z
-  //   .array(ImgSchema)
-  //   .max(IMG_MAX_LIMIT, { message: 'You can only add up to 3 images' }),
   description: z
     .string()
     .min(3, { message: 'Dish description must be at least 3 characters' }),
@@ -63,8 +61,10 @@ const formSchema = z.object({
         .number()
         .min(1, { message: 'Quantity must be at least 1' })
     })
-  )
+  ),
+  preparationMethod: z.string().min(1, { message: 'O modo de preparo é obrigatório' }) // Adiciona o campo preparationMethod aqui
 });
+
 
 type DishFormValues = z.infer<typeof formSchema>;
 
@@ -188,6 +188,7 @@ export const DishForm: React.FC<DishFormProps> = ({
 
   const onSubmit = async (data: DishFormValues) => {
     try {
+      console.log(data)
       setLoading(true);
       if (id) {
         await api.put(`/dish/${id}`, {
@@ -197,7 +198,8 @@ export const DishForm: React.FC<DishFormProps> = ({
           price: parseFloat(data.price.toString()),
           // imgUrl: data.imgUrl,
           photoUrl: data.photoUrl ?? null,
-          items: data.items
+          items: data.items,
+          recipe: data.preparationMethod // Inclui o método de preparo aqui
         });
         router.refresh();
         router.push(`/dashboard/dish`);
@@ -206,7 +208,7 @@ export const DishForm: React.FC<DishFormProps> = ({
           title: 'Prato Alterado com sucesso.'
         });
       } else {
-        const res = await api.post(`/dish`, {
+        await api.post(`/dish`, {
           categoriesIds: data.categoriesIds,
           name: data.name,
           description: data.description,
@@ -216,17 +218,17 @@ export const DishForm: React.FC<DishFormProps> = ({
           items: data.items.map((item) => ({
             id: item.id,
             quantity: parseInt(item.quantity.toString())
-          }))
+          })),
+          recipe: data.preparationMethod // Inclui o método de preparo aqui
+        });
+        router.refresh();
+        router.push(`/dashboard/dish`);
+        toast({
+          variant: 'primary',
+          title: 'Prato Adicionado com sucesso.'
         });
       }
-      router.refresh();
-      router.push(`/dashboard/dish`);
-      toast({
-        variant: 'primary',
-        title: 'Prato Adicionado com sucesso.'
-      });
     } catch (error: any) {
-      console.log(error);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
@@ -236,6 +238,7 @@ export const DishForm: React.FC<DishFormProps> = ({
       setLoading(false);
     }
   };
+  
 
   const onDelete = async () => {
     try {
@@ -324,7 +327,40 @@ export const DishForm: React.FC<DishFormProps> = ({
                 </FormItem>
               )}
             />
-            <FormField
+            {/* <FormField
+              control={form.control}
+              name="categoriesIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoria do Prato</FormLabel>
+                  <Select
+                     categories={categories}
+                     value={field.value}
+                     onValueChange={(value) => {
+                       field.onChange(value);
+                     }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Selecione uma categoria"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+             <FormField
               control={form.control}
               name="categoriesIds"
               render={({ field }) => (
@@ -337,6 +373,24 @@ export const DishForm: React.FC<DishFormProps> = ({
                 />
               )}
             />
+            <FormField
+              control={form.control}
+              name="preparationMethod"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Modo de preparo</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      disabled={loading}
+                      placeholder="Escreva qual o passo a passo para fazer o prato. ATENÇÃO: só será visivel para funcionários."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+           
             {/* Items Form Field */}
             <div className="space-y-4 ">
               <FormLabel>Items</FormLabel>
