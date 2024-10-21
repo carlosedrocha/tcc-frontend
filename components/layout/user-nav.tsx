@@ -41,7 +41,7 @@ export function UserNav() {
   const logout = () => {
     localStorage.removeItem('user')
     setUser(null)
-    router.push('/login')
+    router.push('/')
   }
 
   if (!user) return null // Renderiza nada se não houver usuário
