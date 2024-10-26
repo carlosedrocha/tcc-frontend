@@ -1,29 +1,39 @@
 'use client';
 import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
-import { BellRing, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import { BellRing, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import BreadCrumb from '@/components/breadcrumb';
+import { Heading } from '@/components/ui/heading';
 
 let socket: ReturnType<typeof io> | null = null;
+const breadcrumbItems = [{ title: 'Campainha', link: '/dashboard/campainha' }];
 
 export default function Page() {
   const [connected, setConnected] = useState(false);
-  const [notifications, setNotifications] = useState<{ title: string, description: string, read: boolean }[]>([]);
+  const [notifications, setNotifications] = useState<
+    { title: string; description: string; read: boolean }[]
+  >([]);
   const [unreadCount, setUnreadCount] = useState(0); // Estado para o contador de novas notificações
 
   useEffect(() => {
-    // Carregar notificações do localStorage ao montar o componente
     const storedNotifications = localStorage.getItem('notifications');
     if (storedNotifications) {
       const parsedNotifications = JSON.parse(storedNotifications);
       setNotifications(parsedNotifications);
-      setUnreadCount(parsedNotifications.filter((n: any) => !n.read).length); // Atualiza o contador de novas notificações
+      setUnreadCount(parsedNotifications.filter((n: any) => !n.read).length);
     }
 
-    // Conectar ao WebSocket Gateway do NestJS quando o componente carregar
     socket = io('http://localhost:3333');
 
     socket.on('connect', () => {
@@ -31,24 +41,24 @@ export default function Page() {
       console.log('Conectado ao servidor WebSocket');
     });
 
-    // Receber notificações do WebSocket
     socket.on('waiterNotification', (data: string) => {
       const newNotification = {
         title: data,
-        description: "Agora mesmo", // Tempo mock, você pode adaptar para tempo real
-        read: false, // Nova notificação começa como não lida
+        description: 'Agora mesmo',
+        read: false
       };
 
-      // Adiciona a nova notificação no início da lista
       setNotifications((prevNotifications) => {
         const updatedNotifications = [newNotification, ...prevNotifications];
-        localStorage.setItem('notifications', JSON.stringify(updatedNotifications)); // Salva as notificações no localStorage
+        localStorage.setItem(
+          'notifications',
+          JSON.stringify(updatedNotifications)
+        );
         return updatedNotifications;
       });
-      setUnreadCount((prevCount) => prevCount + 1); // Incrementa o contador de novas notificações
+      setUnreadCount((prevCount) => prevCount + 1);
     });
 
-    // Desconectar o socket quando o componente for desmontado
     return () => {
       if (socket) {
         socket.disconnect();
@@ -57,38 +67,50 @@ export default function Page() {
   }, []);
 
   const markAllAsRead = () => {
-    // Limpa as notificações na tela
     setNotifications([]);
-    setUnreadCount(0); // Reseta o contador de novas notificações
-
-    // Limpa as notificações do localStorage
+    setUnreadCount(0);
     localStorage.removeItem('notifications');
   };
 
   return (
-    <div className="p-4">
-      {/* <h1>Mesas Abertas:</h1>
-      <br /> */}
-      <CardDemo notifications={notifications} markAllAsRead={markAllAsRead} unreadCount={unreadCount} />
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+      <BreadCrumb items={breadcrumbItems} />
+      <div className="flex items-start justify-between">
+        <Heading
+          title={`Campainha`}
+          description="Veja as mesas que estão solicitando atendimento"
+        />
+      </div>
+
+      <CardDemo
+        notifications={notifications}
+        markAllAsRead={markAllAsRead}
+        unreadCount={unreadCount}
+      />
     </div>
   );
 }
 
 type CardProps = React.ComponentProps<typeof Card> & {
-  notifications: { title: string, description: string, read: boolean }[];
+  notifications: { title: string; description: string; read: boolean }[];
   markAllAsRead: () => void;
-  unreadCount: number; // Adicionado o contador de novas notificações
+  unreadCount: number;
 };
 
-function CardDemo({ className, notifications, markAllAsRead, unreadCount, ...props }: CardProps) {
-  // Limita o número de notificações exibidas
-  const displayedNotifications = notifications.slice(0, 5); // Exibe apenas as 5 notificações mais recentes
+function CardDemo({
+  className,
+  notifications,
+  markAllAsRead,
+  unreadCount,
+  ...props
+}: CardProps) {
+  const displayedNotifications = notifications.slice(0, 5);
 
   return (
-    <Card className={cn("w-[380px]", className)} {...props}>
+    <Card className={cn('w-[380px]', className)} {...props}>
       <CardHeader>
         <CardTitle>Notificações</CardTitle>
-        <CardDescription>{unreadCount} novas notificações.</CardDescription> {/* Exibe o contador de novas notificações */}
+        <CardDescription>{unreadCount} novas notificações.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
         <div>
@@ -97,11 +119,10 @@ function CardDemo({ className, notifications, markAllAsRead, unreadCount, ...pro
               key={index}
               className="mb-4 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
             >
-              {/* A bola azul só é exibida se a notificação não foi lida */}
               <span
                 className={cn(
-                  "flex h-2 w-2 translate-y-1 rounded-full bg-sky-500",
-                  notification.read && "invisible"
+                  'flex h-2 w-2 translate-y-1 rounded-full bg-sky-500',
+                  notification.read && 'invisible'
                 )}
               />
               <div className="space-y-1">
