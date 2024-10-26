@@ -67,7 +67,12 @@ export default function Header() {
   }, []);
 
   const markAllAsRead = () => {
-    setNotifications([]);
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notification) => ({
+        ...notification,
+        read: true
+      }))
+    );
     setUnreadCount(0);
     localStorage.removeItem('notifications');
   };
@@ -94,7 +99,14 @@ export default function Header() {
           <UserNav />
           <Popover>
             <PopoverTrigger>
-              <Bell className="h-5 w-5" />
+              <div className="relative">
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-xs text-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
             </PopoverTrigger>
             <PopoverContent className="flex w-[320px] -translate-x-10 justify-center p-2">
               <CardDemo
