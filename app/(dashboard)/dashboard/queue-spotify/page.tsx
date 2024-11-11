@@ -53,7 +53,8 @@ const Page = ({ searchParams }: paramsProps) => {
 
   // Função de login do Spotify
   const handleSpotifyLogin = async () => {
-    const response = await api.get('/spotify/login'); // Supondo que essa rota verifica se o usuário está logado
+    const response = await api.get('/spotify/login');
+    console.log(response.data); // Supondo que essa rota verifica se o usuário está logado
     router.push(response.data); // Redireciona para a rota de autenticação com o Spotify
   };
 
