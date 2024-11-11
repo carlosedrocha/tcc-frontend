@@ -10,7 +10,6 @@ import {
 } from '@tanstack/react-table';
 import React from 'react';
 
-import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
   Table,
@@ -35,7 +34,7 @@ interface DataTableProps<TData, TValue> {
   };
 }
 
-  export function FinancialReportTable<TData, TValue>({
+export function FinancialReportTable<TData, TValue>({
   columns,
   data,
   pageNo,
@@ -139,14 +138,14 @@ interface DataTableProps<TData, TValue> {
 
   return (
     <>
-      <Input
+      {/* <Input
         placeholder={`Search ${searchKey}...`}
         value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
         onChange={(event) =>
           table.getColumn(searchKey)?.setFilterValue(event.target.value)
         }
         className="w-full md:max-w-sm"
-      />
+      /> */}
       <ScrollArea className="h-[calc(80vh-220px)] rounded-md border">
         <Table className="relative">
           <TableHeader>

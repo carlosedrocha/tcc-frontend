@@ -1,21 +1,11 @@
-import header from '@/components/layout/header';
+import { IFinancialReport } from '@/app/(dashboard)/dashboard/financial/report/page';
 import { ColumnDef } from '@tanstack/react-table';
 
 export const columns: ColumnDef<IFinancialReport>[] = [
   {
-    accessorKey: 'title',
-    header: 'Título',
-    cell: ({ row }) => row.getValue('title')
-  },
-  {
-    accessorKey: 'amount',
-    header: 'Valor',
-    cell: ({ row }) => row.getValue('amount')
-  },
-  {
-    accessorKey: 'date',
-    header: 'Data',
-    cell: ({ row }) => row.getValue('date')
+    accessorKey: 'description',
+    header: 'Descrição',
+    cell: ({ row }) => row.getValue('description')
   },
   {
     accessorKey: 'category',
@@ -23,8 +13,17 @@ export const columns: ColumnDef<IFinancialReport>[] = [
     cell: ({ row }) => row.getValue('category')
   },
   {
-    accessorKey: 'description',
-    header: 'Descrição',
-    cell: ({ row }) => row.getValue('description')
+    accessorKey: 'amount',
+    header: 'Valor',
+    cell: ({ row }) =>
+      row.getValue('amount').toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      })
+  },
+  {
+    accessorKey: 'date',
+    header: 'Data',
+    cell: ({ row }) => row.getValue('date').toISOString().split('T')[0]
   }
 ];

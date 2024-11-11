@@ -50,39 +50,39 @@ enum TransactionStatus {
 
 // Create a mapping for each enum to lowercase keys
 const categoryMapping: { [key in TransactionCategory]: string } = {
-  [TransactionCategory.FOOD]: 'food',
+  [TransactionCategory.FOOD]: 'FOOD',
   [TransactionCategory.SALARY]: 'SALARY',
   [TransactionCategory.STOCK]: 'STOCK',
-  [TransactionCategory.BILLS]: 'bills',
+  [TransactionCategory.BILLS]: 'BILLS',
   [TransactionCategory.MAINTENANCE]: 'maintenance',
-  [TransactionCategory.OTHER]: 'other'
+  [TransactionCategory.OTHER]: 'OTHER'
 };
 
 const typeMapping: { [key in TransactionType]: string } = {
-  [TransactionType.SALE]: 'sale',
-  [TransactionType.EXPENSE]: 'expense',
-  [TransactionType.INCOME]: 'income',
-  [TransactionType.PAYMENT]: 'payment'
+  [TransactionType.SALE]: 'SALE',
+  [TransactionType.EXPENSE]: 'EXPENSE',
+  [TransactionType.INCOME]: 'INCOME',
+  [TransactionType.PAYMENT]: 'PAYMENT'
 };
 
 const paymentMethodMapping: { [key in TransactionPaymentMethod]: string } = {
-  [TransactionPaymentMethod.CASH]: 'cash',
-  [TransactionPaymentMethod.CREDIT_CARD]: 'credit_card',
-  [TransactionPaymentMethod.DEBIT_CARD]: 'debit_card',
-  [TransactionPaymentMethod.PIX]: 'pix',
-  [TransactionPaymentMethod.TRANSFER]: 'transfer'
+  [TransactionPaymentMethod.CASH]: 'CASH',
+  [TransactionPaymentMethod.CREDIT_CARD]: 'CREDIT_CARD',
+  [TransactionPaymentMethod.DEBIT_CARD]: 'DEBIT_CARD',
+  [TransactionPaymentMethod.PIX]: 'PIX',
+  [TransactionPaymentMethod.TRANSFER]: 'TRANSFER'
 };
 
 const movementTypeMapping: { [key in MovementType]: string } = {
-  [MovementType.ENTRY]: 'entry',
-  [MovementType.EXIT]: 'exit',
-  [MovementType.ADJUSTMENT]: 'adjustment'
+  [MovementType.ENTRY]: 'ENTRY',
+  [MovementType.EXIT]: 'EXIT',
+  [MovementType.ADJUSTMENT]: 'ADJUSTMENT'
 };
 
 const statusMapping: { [key in TransactionStatus]: string } = {
-  [TransactionStatus.PENDING]: 'pending',
-  [TransactionStatus.PAID]: 'paid',
-  [TransactionStatus.CANCELED]: 'canceled'
+  [TransactionStatus.PENDING]: 'PENDING',
+  [TransactionStatus.PAID]: 'PAID',
+  [TransactionStatus.CANCELED]: 'CANCELED'
 };
 
 export interface IFinancialReport {

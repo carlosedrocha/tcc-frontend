@@ -242,12 +242,12 @@ export const navItems: NavItem[] = [
     icon: 'conciergeBell',
     label: 'bell'
   },
-  {
-    title: 'Financeiro - Dashboard',
-    href: '/dashboard/financial/dashboard',
-    icon: 'conciergeBell',
-    label: 'bell'
-  },
+  // {
+  //   title: 'Financeiro - Dashboard',
+  //   href: '/dashboard/financial/dashboard',
+  //   icon: 'conciergeBell',
+  //   label: 'bell'
+  // },
   {
     title: 'Logout',
     href: '/',
