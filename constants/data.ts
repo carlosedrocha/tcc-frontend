@@ -237,6 +237,7 @@ export const navItems: NavItem[] = [
     label: 'bell'
   },
   {
+<<<<<<< HEAD
     title: 'Financeiro - Relatório',
     href: '/dashboard/financial/report',
     icon: 'conciergeBell',
@@ -248,6 +249,13 @@ export const navItems: NavItem[] = [
   //   icon: 'conciergeBell',
   //   label: 'bell'
   // },
+=======
+    title: 'Spotify',
+    href: '/dashboard/queue-spotify',
+    icon: 'song',
+    label: 'song'
+  },
+>>>>>>> queue_spotify
   {
     title: 'Logout',
     href: '/',
