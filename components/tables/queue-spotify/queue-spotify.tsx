@@ -21,12 +21,23 @@ interface Track {
   imageUrl: string;
   url: string;
 }
+export interface MusicInQueue {
+  id: string;
+  name: string;
+  albumName: string;
+  durationMs: number;
+  imageUrl: string;
+  url: string;
+  likes: number;
+  addedAt: Date;
+}
 
 export function QueueSoptifyTable() {
   const [searchValue, setSearchValue] = useState('');
   const [filteredData, setFilteredData] = useState<Track[]>([]);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [selectedTracks, setSelectedTracks] = useState<Track[]>([]); // Estado para armazenar as músicas selecionadas
+  const [tracks, setTracks] = useState<MusicInQueue[]>([]);
+  // Estado para armazenar as músicas selecionadas
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Função para buscar dados a cada tecla pressionada
@@ -52,11 +63,20 @@ export function QueueSoptifyTable() {
     setSearchValue(event.target.value);
     fetchData(event.target.value); // Chama a busca a cada alteração do valor
   };
+  const handleGetQueue = async () => {
+    setTracks([]);
+    const response = await api.get('/spotify/queue');
+    setTracks(response.data);
+  };
 
-  const handleSelectTrack = (track: Track) => {
+  const handleSelectTrack = async (track: Track) => {
     setSearchValue(''); // Limpa o campo de pesquisa
     setIsDropdownVisible(false); // Fecha o dropdown
-    setSelectedTracks((prevTracks) => [...prevTracks, track]); // Adiciona a música selecionada à lista de músicas
+    try {
+      const response = await api.post('/spotify/queue', track);
+      console.log(response);
+      handleGetQueue();
+    } catch (error) {} // Adiciona a música selecionada à lista de músicas
     console.log('Track selected:', track); // Log para verificar a música selecionada
   };
 
@@ -69,9 +89,18 @@ export function QueueSoptifyTable() {
       setIsDropdownVisible(false);
     }
   };
+  const handleLike = async (id: string) => {
+    try {
+      await api.post(`/spotify/queue/like/${id}`);
+      handleGetQueue(); // Envia o ID da música ao back-end
+    } catch (error) {
+      console.error('Erro ao adicionar like:', error);
+    }
+  };
 
   // UseEffect para monitorar cliques fora do dropdown
   useEffect(() => {
+    handleGetQueue();
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
@@ -123,14 +152,14 @@ export function QueueSoptifyTable() {
               <TableHead>Músicas</TableHead>
               <TableHead>Álbum</TableHead>
               <TableHead>Duração</TableHead>
+              <TableHead>Likes</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {selectedTracks.length > 0 ? (
-              selectedTracks.map((track) => (
+            {tracks.length > 0 ? (
+              tracks.map((track) => (
                 <TableRow key={track.id}>
                   <TableCell>
-                    {' '}
                     <img
                       src={track.imageUrl}
                       alt={track.name}
@@ -142,12 +171,36 @@ export function QueueSoptifyTable() {
                   <TableCell>
                     {(track.durationMs / 1000 / 60).toFixed(2)} min
                   </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span>{track.likes}</span>
+                      <button
+                        onClick={() => handleLike(track.id)}
+                        className="text-gray-500 hover:text-red-500"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                          stroke="currentColor"
+                          className="h-6 w-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M11.998 21.235a1.2 1.2 0 01-.716-.255C7.232 17.787 4 14.717 4 10.805c0-2.64 2.1-4.805 4.665-4.805 1.303 0 2.49.677 3.333 1.823a5.32 5.32 0 013.332-1.823c2.566 0 4.666 2.165 4.666 4.805 0 3.912-3.232 6.982-7.283 10.175a1.2 1.2 0 01-.717.255z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={3} className="h-24 text-center">
-                  Nenhuma música selecionada
+                <TableCell colSpan={5} className="h-24 text-center">
+                  Nenhuma música na fila
                 </TableCell>
               </TableRow>
             )}

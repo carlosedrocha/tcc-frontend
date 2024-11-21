@@ -43,6 +43,8 @@ const Page = ({ searchParams }: paramsProps) => {
       const token = params.get('token');
       if (token) {
         setIsLoggedIn(true);
+        api.post('/spotify/queue/start');
+        // api.get()
       } else {
         setShowLoginModal(true); // Exibe o modal caso o token não esteja presente
       }
@@ -53,8 +55,7 @@ const Page = ({ searchParams }: paramsProps) => {
 
   // Função de login do Spotify
   const handleSpotifyLogin = async () => {
-    const response = await api.get('/spotify/login');
-    console.log(response.data); // Supondo que essa rota verifica se o usuário está logado
+    const response = await api.get('/spotify/login'); // Supondo que essa rota verifica se o usuário está logado
     router.push(response.data); // Redireciona para a rota de autenticação com o Spotify
   };
 
