@@ -13,6 +13,9 @@ import {
 } from '@/components/ui/table';
 import api from '@/app/api';
 
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
+
 interface Track {
   id: string;
   name: string;
@@ -37,22 +40,19 @@ export function QueueSoptifyTable() {
   const [filteredData, setFilteredData] = useState<Track[]>([]);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [tracks, setTracks] = useState<MusicInQueue[]>([]);
-  // Estado para armazenar as músicas selecionadas
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  // Função para buscar dados a cada tecla pressionada
   const fetchData = async (query: string) => {
     if (query.length < 3) {
-      setFilteredData([]); // Não exibe nada se a busca for muito curta
+      setFilteredData([]);
       setIsDropdownVisible(false);
       return;
     }
 
     try {
       const response = await api.get(`/spotify/search/${query}`);
-      console.log('API Response:', response); // Verificando a resposta da API
-      setFilteredData(response.data || []); // Ajuste conforme a resposta da API
-      setIsDropdownVisible(true); // Exibe as opções se houver resultados
+      setFilteredData(response.data || []);
+      setIsDropdownVisible(true);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       setIsDropdownVisible(false);
@@ -61,8 +61,9 @@ export function QueueSoptifyTable() {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(event.target.value);
-    fetchData(event.target.value); // Chama a busca a cada alteração do valor
+    fetchData(event.target.value);
   };
+
   const handleGetQueue = async () => {
     setTracks([]);
     const response = await api.get('/spotify/queue');
@@ -70,17 +71,31 @@ export function QueueSoptifyTable() {
   };
 
   const handleSelectTrack = async (track: Track) => {
-    setSearchValue(''); // Limpa o campo de pesquisa
-    setIsDropdownVisible(false); // Fecha o dropdown
+    setSearchValue('');
+    setIsDropdownVisible(false);
+
+    // Verifica se a música já está na fila
+    if (tracks.some((t) => t.id === track.id)) {
+      toast({
+        variant: 'destructive',
+        title: 'A música selecionada já se encontra na fila!'
+      });
+      console;
+      return;
+    }
+
     try {
       const response = await api.post('/spotify/queue', track);
-      console.log(response);
       handleGetQueue();
-    } catch (error) {} // Adiciona a música selecionada à lista de músicas
-    console.log('Track selected:', track); // Log para verificar a música selecionada
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao adicionar música à fila'
+      });
+      console.error('Erro ao adicionar música à fila:', error);
+    }
   };
 
-  // Função para fechar o dropdown ao clicar fora
   const handleClickOutside = (event: MouseEvent) => {
     if (
       dropdownRef.current &&
@@ -89,16 +104,33 @@ export function QueueSoptifyTable() {
       setIsDropdownVisible(false);
     }
   };
+
   const handleLike = async (id: string) => {
     try {
       await api.post(`/spotify/queue/like/${id}`);
-      handleGetQueue(); // Envia o ID da música ao back-end
+      handleGetQueue();
     } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao dar like'
+      });
       console.error('Erro ao adicionar like:', error);
     }
   };
+  const handleStartSong = async () => {
+    try {
+      if (tracks.length === 0) {
+        toast({
+          variant: 'destructive',
+          title: 'Não tem músicas na fila!'
+        });
+      }
+      api.post('/spotify/queue/start');
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  // UseEffect para monitorar cliques fora do dropdown
   useEffect(() => {
     handleGetQueue();
     document.addEventListener('click', handleClickOutside);
@@ -109,24 +141,44 @@ export function QueueSoptifyTable() {
 
   return (
     <div className="relative">
-      {/* Campo de input para pesquisa */}
-      <Input
-        placeholder="Pesquise sua música"
-        value={searchValue}
-        onChange={handleInputChange}
-        className="w-full md:w-[700px]"
-      />
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder="Pesquise sua música"
+          value={searchValue}
+          onChange={handleInputChange}
+          className="w-full md:w-[700px]"
+        />
+        <Button
+          className="default ml-auto flex items-center gap-2"
+          onClick={handleStartSong}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+            stroke="currentColor"
+            className="h-5 w-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5.25 4.5v15l13.5-7.5-13.5-7.5z"
+            />
+          </svg>
+          Iniciar Música
+        </Button>
+      </div>
 
-      {/* Dropdown de sugestões */}
       {isDropdownVisible && filteredData.length > 0 && (
         <div
           ref={dropdownRef}
-          className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-lg border bg-zinc-950  "
+          className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-lg border bg-zinc-950"
         >
           {filteredData.map((track) => (
             <div
               key={track.id}
-              className="cursor-pointer p-2 hover:bg-gray-50"
+              className="cursor-pointer p-2 hover:bg-zinc-800"
               onClick={() => handleSelectTrack(track)}
             >
               <div className="flex items-center gap-2">
@@ -143,7 +195,6 @@ export function QueueSoptifyTable() {
         </div>
       )}
 
-      {/* Tabela com as músicas selecionadas */}
       <ScrollArea className="mt-4 h-[calc(80vh-220px)] rounded-md border">
         <Table className="relative">
           <TableHeader>
