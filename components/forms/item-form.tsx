@@ -215,6 +215,13 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
     fetchItemById();
   }, [urlId, form, toast]);
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
   return (
     <>
       {/* <AlertModal
@@ -304,8 +311,19 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
                       type="text"
                       disabled={loading}
                       placeholder="R$: 35,00"
-                      value={field.value ?? ''} // Usando o operador de coalescência nula para garantir que o valor seja definido
-                      onChange={field.onChange} // Passando a função onChange diretamente
+                      value={
+                        field.value ? formatCurrency(Number(field.value)) : ''
+                      } // Formata o valor com a função formatCurrency
+                      onChange={(e) => {
+                        // Remove o prefixo "R$" e formata o valor inserido
+                        const rawValue = e.target.value
+                          .replace('R$', '')
+                          .replace(/[^\d,.-]/g, '')
+                          .trim(); // Remove caracteres não numéricos
+                        const numericValue =
+                          parseFloat(rawValue.replace(',', '.')) || 0; // Converte para número, tratando a vírgula
+                        field.onChange(numericValue); // Atualiza o valor no formulário
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
