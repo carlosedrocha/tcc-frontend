@@ -184,6 +184,37 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
     }
   };
 
+  useEffect(() => {
+    const fetchItemById = async () => {
+      if (urlId && urlId !== 'new') {
+        // Verifica se não é um novo item
+        try {
+          const response = await api.get(`/item/${urlId}`); // Faz a requisição ao endpoint
+          const itemData = response.data;
+          // Atualiza os valores do formulário com os dados recebidos
+          form.reset({
+            name: itemData.name || '',
+            description: itemData.description || '',
+            measurementUnit: itemData.measurementUnit || '',
+            measurementUnitValue:
+              itemData.measurementUnitValue?.toString() || '',
+            price: itemData.cost?.toString() || '',
+            typeId: itemData.type?.id || ''
+          });
+        } catch (error) {
+          toast({
+            variant: 'destructive',
+            title: 'Erro ao buscar o item',
+            description:
+              'Não foi possível carregar os dados do item. Tente novamente mais tarde.'
+          });
+        }
+      }
+    };
+
+    fetchItemById();
+  }, [urlId, form, toast]);
+
   return (
     <>
       {/* <AlertModal
@@ -238,12 +269,12 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value} // Garantir que o "value" esteja correto (id do tipo)
                   >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
-                          defaultValue={field.value}
+                          value={field.value} // Aqui, o valor será o ID do tipo de item selecionado.
                           placeholder="Selecione uma categoria"
                         />
                       </SelectTrigger>
