@@ -241,7 +241,7 @@ export const navItems: NavItem[] = [
     href: '/',
     icon: 'logout',
     label: 'logout'
-  },
+  }
 ];
 
 export type ItemTypeT = {

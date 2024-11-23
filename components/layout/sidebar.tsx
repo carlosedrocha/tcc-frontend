@@ -5,20 +5,44 @@ import { navItems } from '@/constants/data';
 import { cn } from '@/lib/utils';
 import { ChevronLeft } from 'lucide-react';
 import { useSidebar } from '@/hooks/useSidebar';
+import { permissions, rolePermissions } from '../../rabc/permission';
 
 type SidebarProps = {
   className?: string;
 };
 
+const getUserRole = () => {
+  const storedRole = sessionStorage.getItem('role');
+  return storedRole ? storedRole.replace(/"/g, '').toLowerCase() : 'waiter';
+};
+
 export default function Sidebar({ className }: SidebarProps) {
   const { isMinimized, toggle } = useSidebar();
   const [status, setStatus] = useState(false);
+  const user = getUserRole();
+
+  console.log('estou aqui', user);
+
+  const canCreate = permissions.create();
+  const canEdit = permissions.edit();
+  const canDelete = permissions.delete();
+  const canView = permissions.view();
+
+  console.log(`Role: ${user}`);
+  console.log(`Permissões: `);
+  console.log(`  - Criar: ${canCreate}`);
+  console.log(`  - Editar: ${canEdit}`);
+  console.log(`  - Deletar: ${canDelete}`);
+  console.log(`  - Visualizar: ${canView}`);
 
   const handleToggle = () => {
     setStatus(true);
     toggle();
     setTimeout(() => setStatus(false), 500);
   };
+
+  const filteredNavItems = getFilteredNavItems(user);
+
   return (
     <nav
       className={cn(
@@ -38,10 +62,20 @@ export default function Sidebar({ className }: SidebarProps) {
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <div className="mt-3 space-y-1">
-            <DashboardNav items={navItems} />
+            <DashboardNav items={filteredNavItems} />
           </div>
         </div>
       </div>
     </nav>
   );
 }
+
+const getFilteredNavItems = (user: string) => {
+  return navItems.filter(
+    (item) =>
+      permissions.view() ||
+      (rolePermissions as any)[user].includes(item.label) ||
+      item.label === 'Inicio' ||
+      item.label === 'Logout'
+  );
+};
