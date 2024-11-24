@@ -18,7 +18,9 @@ export interface ItemTypeI {
   deletedAt?: Date;
 }
 
-const breadcrumbItems = [{ title: 'Itens', link: '/dashboard/item-type' }];
+const breadcrumbItems = [
+  { title: 'Fila de música', link: '/dashboard/item-type' }
+];
 
 type paramsProps = {
   searchParams: {
@@ -40,11 +42,29 @@ const Page = ({ searchParams }: paramsProps) => {
   // Função para verificar o status de autenticação
   useEffect(() => {
     const checkAuthStatus = () => {
-      const token = params.get('token');
+      const token = sessionStorage.getItem('spotifyToken');
       if (token) {
         setIsLoggedIn(true);
       } else {
-        setShowLoginModal(true); // Exibe o modal caso o token não esteja presente
+        const tokenFromUrl = params.get('token');
+        if (tokenFromUrl) {
+          sessionStorage.setItem('spotifyToken', tokenFromUrl); // Salva o token no sessionStorage
+
+          // Remove o token da URL
+          const urlWithoutToken = window.location.href.split('?')[0];
+          const searchParams = new URLSearchParams(window.location.search);
+          searchParams.delete('token');
+          const newUrl = `${urlWithoutToken}?${searchParams.toString()}`;
+          window.history.replaceState(
+            null,
+            '',
+            newUrl.endsWith('?') ? urlWithoutToken : newUrl
+          );
+
+          setIsLoggedIn(true);
+        } else {
+          setShowLoginModal(true); // Exibe o modal caso o token não esteja presente
+        }
       }
     };
 
@@ -93,7 +113,7 @@ const Page = ({ searchParams }: paramsProps) => {
         <BreadCrumb items={breadcrumbItems} />
 
         <div className="flex items-start justify-between">
-          <Heading title={`Fila de música (${totalItems})`} description="" />
+          <Heading title={`Fila de música`} description="" />
         </div>
         <Separator />
 

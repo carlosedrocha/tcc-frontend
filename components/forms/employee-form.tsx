@@ -127,7 +127,6 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({ initialData }) => {
   const id = params['employeeId'] === 'new' ? null : params['employeeId'];
 
   const { roles, employeeData } = useEmployeeData(id);
-  console.log('formcomponent', employeeData);
   initialData = employeeData ? employeeData : initialData;
 
   
@@ -151,8 +150,6 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({ initialData }) => {
         cpf: '',
         roleId: null
       };
-
-  console.log('defaultValues', defaultValues);
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(formSchema),
@@ -332,15 +329,13 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({ initialData }) => {
                   <FormLabel>Cargo</FormLabel>
                   <Select
                     disabled={loading}
+                    value={field.value?.toString() || ''}
                     onValueChange={field.onChange}
-                    defaultValue={
-                      field.value ?? defaultValues.roleId?.toString()
-                    }
                   >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
-                          defaultValue={field.value}
+                          defaultValue={field.value?.toString()}
                           placeholder="Selecione"
                         />
                       </SelectTrigger>
