@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/app/api';
 import BreadCrumb from '@/components/breadcrumb';
 import { columns } from '@/components/tables/item-type-tables/columns';
-import { Heading } from '@/components/ui/heading';
-import { Separator } from '@/components/ui/separator';
 import { QueueSoptifyTable } from '@/components/tables/queue-spotify/queue-spotify';
 import { Button } from '@/components/ui/button'; // Importação do botão do shadcn
+import { Heading } from '@/components/ui/heading';
+import { Separator } from '@/components/ui/separator';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export interface ItemTypeI {
   id: string;
@@ -73,7 +73,7 @@ const Page = ({ searchParams }: paramsProps) => {
 
   // Função de login do Spotify
   const handleSpotifyLogin = async () => {
-    const response = await api.get('/spotify/login'); // Supondo que essa rota verifica se o usuário está logado
+    const response = await api.get('/spotify/login');
     router.push(response.data); // Redireciona para a rota de autenticação com o Spotify
   };
 

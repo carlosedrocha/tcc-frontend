@@ -237,6 +237,18 @@ export const navItems: NavItem[] = [
     label: 'bell'
   },
   {
+    title: 'Financeiro - Relatório',
+    href: '/dashboard/financial/report',
+    icon: 'conciergeBell',
+    label: 'bell'
+  },
+  {
+    title: 'Financeiro - Dashboard',
+    href: '/dashboard/financial/dashboard',
+    icon: 'conciergeBell',
+    label: 'bell'
+  },
+  {
     title: 'Spotify',
     href: '/dashboard/queue-spotify',
     icon: 'song',

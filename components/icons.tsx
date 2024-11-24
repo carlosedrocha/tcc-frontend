@@ -50,7 +50,7 @@ export const Icons = {
   login: LogIn,
   sandwich: Sandwich,
   close: X,
-  song:ListMusic,
+  song: ListMusic,
   home: Home,
   profile: User2Icon,
   spinner: Loader2,
@@ -80,9 +80,9 @@ export const Icons = {
   beef: Beef,
   scrollText: ScrollText,
   clipboardList: ClipboardList,
-  conciergeBell:ConciergeBell,
-  logout:LogOut,
-  
+  conciergeBell: ConciergeBell,
+  logout: LogOut,
+
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"
