@@ -1,4 +1,5 @@
 'use client';
+import HeroComponent from '@/components/home/hero/hero-component';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -78,6 +79,7 @@ export default function Page() {
 
   return (
     <div className="p-4">
+      <HeroComponent />
       {/* <h1>Mesas Abertas:</h1>
       <br /> */}
       <CardDemo

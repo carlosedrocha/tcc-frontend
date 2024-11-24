@@ -87,7 +87,7 @@ const Page = ({ searchParams }: paramsProps) => {
         </div>
         <Separator />
 
-        <StockEntryTable
+      <StockEntryTable
           searchKey="name"
           pageNo={page}
           columns={columns}

@@ -4,22 +4,24 @@ import api from '@/app/api';
 import BreadCrumb from '@/components/breadcrumb';
 import { FinancialReportTable } from '@/components/tables/financial-report-table/financial-report-table';
 import { columns } from '@/components/tables/financial-report-table/financial-report-table-columns';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
+import { saveAs } from 'file-saver';
+import Papa from 'papaparse';
 
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
 // Enum Definitions
-enum TransactionType {
+export enum TransactionType {
   SALE = 'Vendas',
   EXPENSE = 'Despesas',
   INCOME = 'Recebimentos',
   PAYMENT = 'Pagamentos'
 }
 
-enum TransactionPaymentMethod {
+export enum TransactionPaymentMethod {
   CASH = 'Dinheiro',
   CREDIT_CARD = 'Cartão de Crédito',
   DEBIT_CARD = 'Cartão de Débito',
@@ -27,13 +29,13 @@ enum TransactionPaymentMethod {
   TRANSFER = 'Transferência'
 }
 
-enum MovementType {
+export enum MovementType {
   ENTRY = 'Entrada',
   EXIT = 'Saída',
   ADJUSTMENT = 'Ajuste'
 }
 
-enum TransactionCategory {
+export enum TransactionCategory {
   FOOD = 'Alimentos',
   SALARY = 'Salário',
   STOCK = 'Estoque',
@@ -91,6 +93,9 @@ export interface IFinancialReport {
   amount: number;
   date: string;
   category: string;
+  movementType: string;
+  paymentMethod: string;
+  transactionType: string;
   description: string;
   createdAt: Date;
   updatedAt: Date;
@@ -120,6 +125,8 @@ const Filters = ({
   >('');
   const [movementType, setMovementType] = useState<MovementType | ''>('');
   const [status, setStatus] = useState<TransactionStatus | ''>('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   const handleFilterChange = () => {
     onFilterChange({
@@ -128,19 +135,21 @@ const Filters = ({
       type,
       paymentMethod,
       movementType,
+      startDate,
+      endDate,
       status
     });
   };
 
   return (
     <div className="flex space-x-4">
-      <input
+      {/* <input
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Buscar por título"
         className="input"
-      />
+      /> */}
       <select
         value={category}
         onChange={(e) => setCategory(e.target.value)}
@@ -179,19 +188,33 @@ const Filters = ({
           </option>
         ))}
       </select>
-      <select
-        value={movementType}
-        onChange={(e) => setMovementType(e.target.value as MovementType)}
+      <input
+        type="date"
+        value={startDate}
+        onChange={(e) => setStartDate(e.target.value)}
+        placeholder="Data Inicial"
         className="input"
-      >
-        <option value="">Tipo de Movimento</option>
-        {Object.values(MovementType).map((movement) => (
-          <option key={movement} value={movement}>
-            {movement}
-          </option>
-        ))}
-      </select>
-      <select
+      />
+      <input
+        type="date"
+        value={endDate}
+        onChange={(e) => setEndDate(e.target.value)}
+        placeholder="Data Final"
+        className="input"
+      />
+      {/* <select
+          value={movementType}
+          onChange={(e) => setMovementType(e.target.value as MovementType)}
+          className="input"
+        >
+          <option value="">Tipo de Movimento</option>
+          {Object.values(MovementType).map((movement) => (
+            <option key={movement} value={movement}>
+              {movement}
+            </option>
+          ))}
+        </select> */}
+      {/* <select
         value={status}
         onChange={(e) => setStatus(e.target.value as TransactionStatus)}
         className="input"
@@ -202,7 +225,7 @@ const Filters = ({
             {statusOption}
           </option>
         ))}
-      </select>
+      </select> */}
       <button
         onClick={handleFilterChange}
         className={cn(buttonVariants({ variant: 'default' }))}
@@ -239,14 +262,16 @@ const Page = ({ searchParams }: paramsProps) => {
             limit: pageLimit,
             search,
             category: categoryMapping[filters.category as TransactionCategory],
-            type: typeMapping[filters.type as TransactionType],
+            transactionType: typeMapping[filters.type as TransactionType],
             paymentMethod:
               paymentMethodMapping[
                 filters.paymentMethod as TransactionPaymentMethod
               ],
             movementType:
               movementTypeMapping[filters.movementType as MovementType],
-            status: statusMapping[filters.status as TransactionStatus]
+            status: statusMapping[filters.status as TransactionStatus],
+            startDate: filters.startDate,
+            endDate: filters.endDate
           }
         });
         const formattedData = response.data.map((report: IFinancialReport) => ({
@@ -255,6 +280,9 @@ const Page = ({ searchParams }: paramsProps) => {
           amount: report.amount,
           date: report.createdAt,
           category: report.category,
+          transactionType: report.transactionType,
+          movementType: report.movementType,
+          paymentMethod: report.paymentMethod,
           description: report.description
         }));
         setData(formattedData);
@@ -275,6 +303,35 @@ const Page = ({ searchParams }: paramsProps) => {
     }));
   };
 
+  // Função para exportar CSV
+  const handleExportCSV = () => {
+    if (data.length === 0) {
+      alert('Não há dados para exportar.');
+      return;
+    }
+
+    // Formatar os dados para exportação
+    const csvData = data.map((item) => ({
+      ID: item.id,
+      Título: item.title,
+      Valor: item.amount,
+      Data: new Date(item.date).toLocaleDateString('pt-BR'),
+      Categoria: item.category,
+      'Tipo de Transacao': item.transactionType,
+      'Metodo de Pagamento': item.paymentMethod,
+      Descricao: item.description
+    }));
+
+    // Gerar o CSV
+    const csv = Papa.unparse(csvData);
+
+    // Salvar o arquivo
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+    const fileName = `relatorio_${date}.csv`;
+    saveAs(blob, fileName);
+  };
+
   return (
     <div className="container py-6">
       <BreadCrumb items={breadcrumbReports} />
@@ -284,10 +341,15 @@ const Page = ({ searchParams }: paramsProps) => {
       <Filters onFilterChange={handleFilterChange} />
       <Separator className="my-4" />
       <FinancialReportTable columns={columns} data={data} />
-      <div className="pagination">
-        <button disabled={page <= 1}>Anterior</button>
-        <span>{page}</span>
-        <button disabled={page >= pageCount}>Próximo</button>
+      <div className="mt-4 flex justify-between">
+        <Button onClick={handleExportCSV} className={cn(buttonVariants())}>
+          Exportar
+        </Button>
+        <div className="pagination flex items-center justify-center space-x-4">
+          <Button disabled={page <= 1}>Anterior</Button>
+          <span className="text-lg font-semibold">{page}</span>
+          <Button disabled={page >= pageCount}>Próximo</Button>
+        </div>
       </div>
     </div>
   );

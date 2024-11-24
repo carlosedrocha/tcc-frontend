@@ -80,7 +80,7 @@ export const ItemTypeForm: React.FC<ItemTypeFormProps> = ({ initialData }) => {
       router.push(`/dashboard/item-type`);
       toast({
         variant: 'primary',
-        title: 'Successo',
+        title: 'Sucesso',
         description: toastMessage
       });
     } catch (error: any) {

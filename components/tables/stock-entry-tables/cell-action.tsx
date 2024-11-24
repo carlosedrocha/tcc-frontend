@@ -1,4 +1,5 @@
 'use client';
+import api from '@/app/api';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,7 +30,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       await api.delete(`/stock-entry/${data.id}`); // Ajuste a rota conforme sua API
       router.refresh(); // Atualiza a página após a exclusão
     } catch (error) {
-      console.error("Erro ao deletar a entrada de estoque:", error);
+      console.error('Erro ao deletar a entrada de estoque:', error);
     } finally {
       setLoading(false);
       setOpen(false); // Fecha o modal após a confirmação
