@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import api from '@/app/api';
 import BreadCrumb from '@/components/breadcrumb';
 import { columns } from '@/components/tables/item-table/columns';
@@ -8,11 +9,9 @@ import { buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import { Item } from '@/constants/data';
-
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
 export interface ItemTypeI {
   id: string;
@@ -30,6 +29,13 @@ type paramsProps = {
   };
 };
 
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(value);
+};
+
 const Page = ({ searchParams }: paramsProps) => {
   const [data, setData] = useState<Item[]>([]);
   const [pageCount, setPageCount] = useState(0);
@@ -41,19 +47,17 @@ const Page = ({ searchParams }: paramsProps) => {
   useEffect(() => {
     const getItem = async () => {
       try {
-        const response = await api.get('/item', {
-          // params: { offset, limit: pageLimit }
-        });
-        const formattedData = response.data.map(item => ({
+        const response = await api.get('/item');
+        const formattedData = response.data.map((item) => ({
           id: item.id,
           name: item.name,
           description: item.description,
           measurementUnit: item.measurementUnit,
           measurementUnitValue: item.measurementUnitValue,
-          cost: item.cost,
+          cost: formatCurrency(item.cost), // Formatação do custo como moeda
           typeId: item.itemTypeId,
           typeName: item.type.name
-        })); 
+        }));
         setData(formattedData);
         setPageCount(Math.ceil(response.data.total / pageLimit));
       } catch (error) {
