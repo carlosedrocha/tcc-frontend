@@ -312,17 +312,23 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
                       disabled={loading}
                       placeholder="R$: 35,00"
                       value={
-                        field.value ? formatCurrency(Number(field.value)) : ''
-                      } // Formata o valor com a função formatCurrency
+                        field.value
+                          ? formatCurrency(Number(field.value)) // Exibe o valor formatado
+                          : ''
+                      }
                       onChange={(e) => {
                         // Remove o prefixo "R$" e formata o valor inserido
                         const rawValue = e.target.value
                           .replace('R$', '')
-                          .replace(/[^\d,.-]/g, '')
-                          .trim(); // Remove caracteres não numéricos
-                        const numericValue =
-                          parseFloat(rawValue.replace(',', '.')) || 0; // Converte para número, tratando a vírgula
-                        field.onChange(numericValue); // Atualiza o valor no formulário
+                          .replace(/[^\d,.-]/g, '') // Remove caracteres inválidos
+                          .trim();
+                        const numericValue = parseFloat(
+                          rawValue.replace(',', '.')
+                        ); // Converte para número
+                        const stringValue = numericValue
+                          ? numericValue.toFixed(2).toString() // Garante que o valor é string com 2 casas decimais
+                          : ''; // Para valores inválidos
+                        field.onChange(stringValue); // Atualiza o valor no formulário como string
                       }}
                     />
                   </FormControl>

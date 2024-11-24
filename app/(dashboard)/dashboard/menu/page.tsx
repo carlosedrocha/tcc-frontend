@@ -311,7 +311,7 @@ export default function Page() {
                     {menu.name}
                   </AccordionTrigger>
                   <AccordionContent>
-                    <ul>
+                    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                       {menu.dishes.map((dish) => (
                         <li key={dish.id} className="mb-4">
                           {dish.photoUrl && (
@@ -360,7 +360,7 @@ export default function Page() {
                         <Link
                           href={`/dashboard/menu/${menu.id}`}
                           className={cn(buttonVariants({ variant: 'default' }))}
-                          style={{ marginBottom: '15px;' }}
+                          style={{ marginBottom: '15px' }}
                         >
                           Editar Menu
                         </Link>

@@ -62,9 +62,10 @@ const formSchema = z.object({
         .min(1, { message: 'Quantity must be at least 1' })
     })
   ),
-  preparationMethod: z.string().min(1, { message: 'O modo de preparo é obrigatório' }) // Adiciona o campo preparationMethod aqui
+  preparationMethod: z
+    .string()
+    .min(1, { message: 'O modo de preparo é obrigatório' }) // Adiciona o campo preparationMethod aqui
 });
-
 
 type DishFormValues = z.infer<typeof formSchema>;
 
@@ -103,17 +104,15 @@ export const DishForm: React.FC<DishFormProps> = ({
         }
         const response = await api.get(`dish/${id}`);
         const data = response.data;
+
         currentDish = data;
-        initialData = data;
-        // initialData = {
-        //   name: data.name,
-        //   description: data.description,
-        //   price: data.price,
-        //   photoUrl: data.photoUrl,
-        //   categoriesIds: data.categories.map((category) => category.id),
-        //   items: data.items
-        // };
-        form.reset(data);
+        initialData = {
+          ...data, // mantém os demais campos
+          preparationMethod: data.recipe // mapeia recipe para preparationMethod
+        };
+
+        console.log('eu sou esse ', initialData);
+        form.reset(initialData);
       } catch (error) {
         toast({
           variant: 'destructive',
@@ -188,7 +187,7 @@ export const DishForm: React.FC<DishFormProps> = ({
 
   const onSubmit = async (data: DishFormValues) => {
     try {
-      console.log(data)
+      console.log('fui atulizado', data);
       setLoading(true);
       if (id) {
         await api.put(`/dish/${id}`, {
@@ -238,7 +237,6 @@ export const DishForm: React.FC<DishFormProps> = ({
       setLoading(false);
     }
   };
-  
 
   const onDelete = async () => {
     try {
@@ -360,7 +358,7 @@ export const DishForm: React.FC<DishFormProps> = ({
                 </FormItem>
               )}
             /> */}
-             <FormField
+            <FormField
               control={form.control}
               name="categoriesIds"
               render={({ field }) => (
@@ -390,7 +388,7 @@ export const DishForm: React.FC<DishFormProps> = ({
                 </FormItem>
               )}
             />
-           
+
             {/* Items Form Field */}
             <div className="space-y-4 ">
               <FormLabel>Items</FormLabel>
