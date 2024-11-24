@@ -38,6 +38,7 @@ import {
   User2Icon,
   UserX2Icon,
   Utensils,
+  ListMusic,
   X
 } from 'lucide-react';
 
@@ -49,6 +50,7 @@ export const Icons = {
   login: LogIn,
   sandwich: Sandwich,
   close: X,
+  song:ListMusic,
   home: Home,
   profile: User2Icon,
   spinner: Loader2,
@@ -80,6 +82,7 @@ export const Icons = {
   clipboardList: ClipboardList,
   conciergeBell:ConciergeBell,
   logout:LogOut,
+  
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

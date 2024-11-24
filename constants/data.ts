@@ -237,11 +237,17 @@ export const navItems: NavItem[] = [
     label: 'bell'
   },
   {
+    title: 'Spotify',
+    href: '/dashboard/queue-spotify',
+    icon: 'song',
+    label: 'song'
+  },
+  {
     title: 'Logout',
     href: '/',
     icon: 'logout',
     label: 'logout'
-  },
+  }
 ];
 
 export type ItemTypeT = {
