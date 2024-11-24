@@ -203,19 +203,19 @@ export const navItems: NavItem[] = [
   {
     title: 'Funcionários',
     href: '/dashboard/employee',
-    icon: 'employee',
+    icon: 'users',
     label: 'employee'
   },
   {
     title: 'Gastos',
     href: '/dashboard/expense',
-    icon: 'employee',
+    icon: 'dolarSign',
     label: 'employee'
   },
   {
     title: 'Entrada Estoque',
     href: '/dashboard/stock',
-    icon: 'sandwich',
+    icon: 'package',
     label: 'sandwich'
   },
   // {
