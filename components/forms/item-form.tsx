@@ -313,22 +313,22 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
                       placeholder="R$: 35,00"
                       value={
                         field.value
-                          ? formatCurrency(Number(field.value)) // Exibe o valor formatado
+                          ? `R$ ${Number(field.value).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })}` // Formata como moeda brasileira
                           : ''
                       }
                       onChange={(e) => {
-                        // Remove o prefixo "R$" e formata o valor inserido
-                        const rawValue = e.target.value
-                          .replace('R$', '')
-                          .replace(/[^\d,.-]/g, '') // Remove caracteres inválidos
-                          .trim();
-                        const numericValue = parseFloat(
-                          rawValue.replace(',', '.')
-                        ); // Converte para número
-                        const stringValue = numericValue
-                          ? numericValue.toFixed(2).toString() // Garante que o valor é string com 2 casas decimais
-                          : ''; // Para valores inválidos
-                        field.onChange(stringValue); // Atualiza o valor no formulário como string
+                        // Remove tudo que não seja número ou vírgula
+                        const rawValue = e.target.value.replace(/[^\d,]/g, '');
+
+                        // Substitui vírgula por ponto e converte para número
+                        const numericValue =
+                          parseFloat(rawValue.replace(',', '.')) || 0;
+
+                        // Atualiza o campo no formulário como string numérica
+                        field.onChange(numericValue.toFixed(2));
                       }}
                     />
                   </FormControl>
@@ -336,6 +336,7 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="measurementUnitValue"

@@ -253,6 +253,15 @@ export const DishForm: React.FC<DishFormProps> = ({
 
   const triggerImgUrlValidation = () => form.trigger('imgUrl');
 
+  function formatCurrency(value: number): string {
+    return `R$ ${value.toFixed(2).replace('.', ',')}`;
+  }
+
+  function parseCurrency(value: string): number {
+    // Remove caracteres inválidos e converte para número
+    return parseFloat(value.replace(/[^\d,-]/g, '').replace(',', '.') || '0');
+  }
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -319,7 +328,25 @@ export const DishForm: React.FC<DishFormProps> = ({
                 <FormItem>
                   <FormLabel>Preço</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} {...field} />
+                    <Input
+                      type="text"
+                      disabled={loading}
+                      value={`R$ ${field.value.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}`} // Exibe o valor formatado
+                      onChange={(e) => {
+                        // Remove tudo que não é número ou vírgula
+                        const input = e.target.value.replace(/[^\d,]/g, '');
+
+                        // Substitui vírgula por ponto e converte para número
+                        const numericValue =
+                          parseFloat(input.replace(',', '.')) || 0;
+
+                        // Atualiza o valor numérico no formulário
+                        field.onChange(numericValue);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
