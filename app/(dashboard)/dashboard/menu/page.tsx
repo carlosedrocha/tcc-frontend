@@ -192,7 +192,6 @@ export default function Page() {
       const response = await api.post('/order', formatedData);
 
       // Processar a resposta
-      console.log('me ajuda deus', response.data);
 
       if (response.status === 201) {
         router.refresh(); // Atualiza a página
