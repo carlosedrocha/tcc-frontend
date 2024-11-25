@@ -32,15 +32,31 @@ const formSchema = z.object({
   quantity: z.number().min(1, { message: 'Quantidade é obrigatória' }),
   itemId: z.string().min(1, { message: 'Item é obrigatório' }), // Campo itemId
   transaction: z.object({
-    type: z.enum(['SALE', 'EXPENSE', 'INCOME', 'PAYMENT'], { required_error: 'Tipo de transação é obrigatório' }),
+    type: z.enum(['SALE', 'EXPENSE', 'INCOME', 'PAYMENT'], {
+      required_error: 'Tipo de transação é obrigatório'
+    }),
     description: z.string().min(1, { message: 'Descrição é obrigatória' }),
-    amount: z.number().min(0, { message: 'Valor deve ser maior ou igual a zero' }),
-    category: z.enum(['FOOD', 'SALARY', 'STOCK', 'BILLS', 'MAINTENANCE', 'OTHER'], { required_error: 'Categoria é obrigatória' }),
-    status: z.enum(['PENDING', 'PAID', 'CANCELED'], { required_error: 'Status é obrigatório' }),
-    paymentMethod: z.enum(['CASH', 'CREDIT_CARD', 'DEBIT_CARD', 'PIX', 'TRANSFER'], { required_error: 'Método de pagamento é obrigatório' }),
+    amount: z
+      .number()
+      .min(0, { message: 'Valor deve ser maior ou igual a zero' }),
+    category: z.enum(
+      ['FOOD', 'SALARY', 'STOCK', 'BILLS', 'MAINTENANCE', 'OTHER'],
+      { required_error: 'Categoria é obrigatória' }
+    ),
+    status: z.enum(['PENDING', 'PAID', 'CANCELED'], {
+      required_error: 'Status é obrigatório'
+    }),
+    paymentMethod: z.enum(
+      ['CASH', 'CREDIT_CARD', 'DEBIT_CARD', 'PIX', 'TRANSFER'],
+      { required_error: 'Método de pagamento é obrigatório' }
+    )
   }),
-  movementType: z.enum(['ENTRY', 'EXIT', 'ADJUSTMENT'], { required_error: 'Tipo de movimentação é obrigatório' }),
-  description: z.string().min(1, { message: 'Descrição da entrada é obrigatória' }),
+  movementType: z.enum(['ENTRY', 'EXIT', 'ADJUSTMENT'], {
+    required_error: 'Tipo de movimentação é obrigatório'
+  }),
+  description: z
+    .string()
+    .min(1, { message: 'Descrição da entrada é obrigatória' })
 });
 
 type StockEntryFormValues = z.infer<typeof formSchema>;
@@ -72,17 +88,18 @@ const useStockEntryData = (id) => {
             amount: data.transaction.amount || 0,
             category: data.transaction.category || 'OTHER',
             status: data.transaction.status || 'PENDING',
-            paymentMethod: data.transaction.paymentMethod || 'CASH',
+            paymentMethod: data.transaction.paymentMethod || 'CASH'
           },
           movementType: data.movementType || 'ENTRY',
-          description: data.description || '',
+          description: data.description || ''
         };
         setStockEntryData(initialDataRef.current);
       } catch (error) {
         toast({
           variant: 'destructive',
           title: 'Erro ao buscar dados da entrada de estoque',
-          description: 'Houve um problema ao buscar os dados, tente novamente mais tarde.',
+          description:
+            'Houve um problema ao buscar os dados, tente novamente mais tarde.'
         });
       }
     };
@@ -107,7 +124,8 @@ const useStockItems = () => {
         toast({
           variant: 'destructive',
           title: 'Erro ao buscar itens de estoque',
-          description: 'Houve um problema ao buscar os itens, tente novamente mais tarde.',
+          description:
+            'Houve um problema ao buscar os itens, tente novamente mais tarde.'
         });
       }
     };
@@ -118,7 +136,9 @@ const useStockItems = () => {
   return stockItems;
 };
 
-export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) => {
+export const StockEntryForm: React.FC<StockEntryFormProps> = ({
+  initialData
+}) => {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -131,28 +151,34 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
 
   const stockItems = useStockItems(); // Itens de estoque
 
-  const title = initialData ? 'Editar Entrada de Estoque' : 'Adicionar Entrada de Estoque';
-  const toastMessage = initialData ? 'Entrada de Estoque Atualizada.' : 'Entrada de Estoque Criada.';
+  const title = initialData
+    ? 'Editar Entrada de Estoque'
+    : 'Adicionar Entrada de Estoque';
+  const toastMessage = initialData
+    ? 'Entrada de Estoque Atualizada.'
+    : 'Entrada de Estoque Criada.';
   const action = initialData ? 'Salvar' : 'Criar';
 
-  const defaultValues = initialData ? initialData : {
-    quantity: 1,
-    itemId: '',
-    transaction: {
-      type: 'SALE',
-      description: '',
-      amount: 0,
-      category: 'OTHER',
-      status: 'PENDING',
-      paymentMethod: 'CASH',
-    },
-    movementType: 'ENTRY',
-    description: '',
-  };
+  const defaultValues = initialData
+    ? initialData
+    : {
+        quantity: 1,
+        itemId: '',
+        transaction: {
+          type: 'SALE',
+          description: '',
+          amount: 0,
+          category: 'OTHER',
+          status: 'PENDING',
+          paymentMethod: 'CASH'
+        },
+        movementType: 'ENTRY',
+        description: ''
+      };
 
   const form = useForm<StockEntryFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues,
+    defaultValues: defaultValues
   });
 
   useEffect(() => {
@@ -164,7 +190,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
   const onSubmit = async (data: StockEntryFormValues) => {
     try {
       setLoading(true);
-      console.log(data)
+      //console.log(data)
       const payload = {
         quantity: Number(data.quantity),
         transaction: {
@@ -173,15 +199,15 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
           amount: Number(data.transaction.amount),
           category: data.transaction.category,
           status: data.transaction.status,
-          paymentMethod: data.transaction.paymentMethod,
+          paymentMethod: data.transaction.paymentMethod
         },
         movementType: data.movementType,
         description: data.description,
-        id: data.itemId,
+        id: data.itemId
       };
 
       await api.post(`/stock-movement/entry/${data.itemId}`, payload);
-      
+
       router.refresh();
       router.push('/dashboard/stock');
       toast({ title: toastMessage });
@@ -189,7 +215,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
       toast({
         variant: 'destructive',
         title: 'Uh oh! Algo deu errado',
-        description: 'Houve um problema com a solicitação, tente novamente.',
+        description: 'Houve um problema com a solicitação, tente novamente.'
       });
     } finally {
       setLoading(false);
@@ -205,7 +231,9 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
             disabled={loading}
             variant="destructive"
             size="sm"
-            onClick={() => {/* Lógica de exclusão */}}
+            onClick={() => {
+              /* Lógica de exclusão */
+            }}
           >
             <Trash className="h-4 w-4" />
           </Button>
@@ -213,7 +241,10 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
       </div>
       <Separator />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="w-full space-y-8"
+        >
           <div className="gap-8 md:grid md:grid-cols-3">
             {/* Campo para selecionar o item */}
             <FormField
@@ -229,7 +260,10 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                       defaultValue={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Selecione um item" />
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Selecione um item"
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {stockItems.map((stockEntry) => (
@@ -265,7 +299,10 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
             />
           </div>
           <Separator />
-          <Heading title="Informações da Transação" description="Detalhes da transação financeira" />
+          <Heading
+            title="Informações da Transação"
+            description="Detalhes da transação financeira"
+          />
           {/* Campos da transação */}
           <div className="gap-8 md:grid md:grid-cols-3">
             {/* Tipo de transação */}
@@ -408,8 +445,12 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="CASH">Dinheiro</SelectItem>
-                        <SelectItem value="CREDIT_CARD">Cartão de Crédito</SelectItem>
-                        <SelectItem value="DEBIT_CARD">Cartão de Débito</SelectItem>
+                        <SelectItem value="CREDIT_CARD">
+                          Cartão de Crédito
+                        </SelectItem>
+                        <SelectItem value="DEBIT_CARD">
+                          Cartão de Débito
+                        </SelectItem>
                         <SelectItem value="PIX">PIX</SelectItem>
                         <SelectItem value="TRANSFER">Transferência</SelectItem>
                       </SelectContent>
@@ -421,7 +462,10 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
             />
           </div>
           <Separator />
-          <Heading title="Movimentação de Estoque" description="Detalhes da movimentação" />
+          <Heading
+            title="Movimentação de Estoque"
+            description="Detalhes da movimentação"
+          />
           {/* Movimento de Estoque */}
           <div className="gap-8 md:grid md:grid-cols-3">
             {/* Tipo de Movimentação */}

@@ -30,7 +30,9 @@ export interface StockEntryI {
   };
 }
 
-const breadcrumbItems = [{ title: 'Entradas de Estoque', link: '/dashboard/stock-entry' }];
+const breadcrumbItems = [
+  { title: 'Entradas de Estoque', link: '/dashboard/stock-entry' }
+];
 
 type paramsProps = {
   searchParams: {
@@ -53,7 +55,6 @@ const Page = ({ searchParams }: paramsProps) => {
       const response = await api.get('/stock', {
         params: { offset, limit: pageLimit }
       });
-      console.log(response.data)
       setData(response.data);
       setPageCount(Math.ceil(response.data.total / pageLimit));
     } catch (error) {

@@ -106,6 +106,16 @@ export type CategoryDish = {
   name: string;
 };
 
+export interface ISection {
+  id: string; // ID único para a seção
+  name: string; // Nome da seção, obrigatório
+  menuIds?: string[]; // IDs dos menus associados, opcional
+  dishIds?: string[]; // IDs dos pratos associados, opcional
+  createdAt: Date; // Data de criação
+  updatedAt: Date; // Data da última atualização
+  deletedAt?: Date; // Data de exclusão (caso a seção tenha sido deletada)
+}
+
 export interface IDish {
   id: string;
   name: string;
@@ -188,6 +198,13 @@ export const navItems: NavItem[] = [
     icon: 'utensils',
     label: 'utensils'
   },
+  {
+    title: 'Seção',
+    href: '/dashboard/section',
+    icon: 'menu',
+    label: 'sandwich'
+  },
+
   {
     title: 'Cardápio',
     href: '/dashboard/menu',

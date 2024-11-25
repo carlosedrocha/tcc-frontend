@@ -73,7 +73,7 @@ export const ItemTypeForm: React.FC<ItemTypeFormProps> = ({ initialData }) => {
         await api.put(`item-type/${initialData.id}`, data);
       } else {
         const res = await api.post(`/item-type`, data);
-        console.log(res);
+        //console.log(res);
         // console.log('item', res);
       }
       router.refresh();

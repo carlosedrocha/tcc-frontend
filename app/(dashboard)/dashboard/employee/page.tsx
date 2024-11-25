@@ -66,7 +66,6 @@ const Page = ({ searchParams }: paramsProps) => {
           email: employee.user?.email,
           cpf: employee.cpf
         }));
-        console.log(formattedData);
         setData(formattedData);
         setPageCount(Math.ceil(response.data.total / pageLimit));
       } catch (error) {

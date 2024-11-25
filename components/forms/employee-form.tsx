@@ -127,10 +127,8 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({ initialData }) => {
   const id = params['employeeId'] === 'new' ? null : params['employeeId'];
 
   const { roles, employeeData } = useEmployeeData(id);
-  console.log('formcomponent', employeeData);
+  //console.log('formcomponent', employeeData);
   initialData = employeeData ? employeeData : initialData;
-
-  
 
   const title = initialData ? 'Editar Funcionário' : 'Adicionar Funcionário';
   const description = initialData
@@ -152,7 +150,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({ initialData }) => {
         roleId: null
       };
 
-  console.log('defaultValues', defaultValues);
+  //console.log('defaultValues', defaultValues);
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(formSchema),
