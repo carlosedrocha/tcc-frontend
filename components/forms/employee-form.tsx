@@ -129,8 +129,6 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({ initialData }) => {
   const { roles, employeeData } = useEmployeeData(id);
   initialData = employeeData ? employeeData : initialData;
 
-  
-
   const title = initialData ? 'Editar Funcionário' : 'Adicionar Funcionário';
   const description = initialData
     ? 'Editar o Funcionário.'

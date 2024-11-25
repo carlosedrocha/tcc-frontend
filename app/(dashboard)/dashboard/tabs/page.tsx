@@ -46,7 +46,6 @@ export default function Page() {
   const fetchTab = async () => {
     try {
       const response = await api.get('/tab');
-      console.log(response.data);
       const tabsData: TabCardData[] = response.data.map((tab: any) => ({
         id: tab.id,
         number:

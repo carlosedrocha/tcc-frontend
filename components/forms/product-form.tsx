@@ -45,7 +45,6 @@ const formSchema = z.object({
   imgUrl: z
     .array(ImgSchema)
     .max(IMG_MAX_LIMIT, { message: 'You can only add up to 3 images' }),
-  // .min(1, { message: 'At least one image must be added.' }),
   description: z
     .string()
     .min(3, { message: 'Product description must be at least 3 characters' }),
@@ -64,7 +63,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
   categories
 }) => {
-  const params = useParams();
+  const params = useParams(); // Aqui é onde pegamos os parâmetros da URL
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -94,8 +93,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     try {
       setLoading(true);
       if (initialData) {
-        // await axios.post(`/api/products/edit-product/${initialData._id}`, data);
+        // Use the `params.id` here to make API request for editing the product
+        // Example: await axios.post(`/api/products/edit-product/${params.id}`, data);
       } else {
+        // Create a new product
         // const res = await axios.post(`/api/products/create-product`, data);
         // console.log("product", res);
       }
@@ -120,10 +121,16 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   const onDelete = async () => {
     try {
       setLoading(true);
-      //   await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
+      // Example: delete product using the params.id
+      // await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
       router.refresh();
       router.push(`/${params.storeId}/products`);
     } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'There was a problem with your request.'
+      });
     } finally {
       setLoading(false);
       setOpen(false);
@@ -245,7 +252,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {/* @ts-ignore  */}
                       {categories.map((category) => (
                         <SelectItem key={category._id} value={category._id}>
                           {category.name}

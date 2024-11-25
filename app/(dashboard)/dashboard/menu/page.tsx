@@ -1,6 +1,13 @@
 'use client';
-import api from '@/app/api';
-import { AlertModal } from '@/components/modal/alert-modal';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Heading } from '@/components/ui/heading';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 import {
   Accordion,
   AccordionContent,
@@ -26,21 +33,32 @@ interface DishData {
   photoUrl: string | null;
 }
 
+interface ItemData {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+}
+
+interface SectionData {
+  id: string;
+  name: string;
+  dishes: DishData[];
+  items: ItemData[];
+}
+
 interface MenuData {
   id: string;
   name: string;
   description: string;
-  dishes: DishData[];
+  sections: SectionData[];
 }
 interface OrderItem {
-  dish: DishData;
-  quantity: number;
-}
-interface OldOrder {
   id: string;
   name: string;
-  price: string;
+  price: number;
   quantity: number;
+  type: 'dish' | 'item'; // Indica se é um prato ou um item
 }
 
 export default function Page() {
@@ -49,167 +67,152 @@ export default function Page() {
   const searchParams = useSearchParams();
   const tabId = searchParams.get('tabId');
   const comandNumber = searchParams.get('tabNumber');
-  const [showModal, setShowModal] = useState(false);
-  const [menuName, setMenuName] = useState('');
-  const [menuDescription, setMenuDescription] = useState('');
   const [menus, setMenus] = useState<MenuData[]>([]);
   const [filter, setFilter] = useState('');
-  const [openAccordions, setOpenAccordions] = useState<string[]>([]);
-  const [orderCart, setOrderCart] = useState<OrderItem[]>([]);
   const [quantity, setQuantity] = useState<Record<string, number>>({});
-  const [oldOrders, setOldOrders] = useState<any[]>([]); // Alterado para uma lista de pedidos
-  const [showUpdateButton, setShowUpdateButton] = useState(false);
-  const [orderId, setOrderId] = useState('');
-  const [menuId, setMenuId] = useState('');
-  const [open, setOpen] = useState(false);
-  const fetchMenu = async () => {
-    try {
-      const response = await api.get('/menu');
-      setMenus(response.data); // Assuming response.data contains the menus with dishes
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao buscar menus'
-      });
-    }
-  };
+  const [orderCart, setOrderCart] = useState<OrderItem[]>([]);
+  const [deletingMenuId, setDeletingMenuId] = useState<string | null>(null);
+  const [previousOrders, setPreviousOrders] = useState<any[]>([]);
 
-  const fetchTabById = async () => {
-    try {
-      const response = await api.get(`/tab/${tabId}`);
-      const ordersData = response.data.orders;
-      setOldOrders(ordersData);
-    } catch (error) {
-      console.log(error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao buscar comanda'
-      });
-    }
-  };
-
-  // Carregar dados salvos ao iniciar
   useEffect(() => {
-    if (tabId) {
-      fetchTabById();
-    }
+    const fetchMenu = async () => {
+      try {
+        const response = await api.get('/menu');
+        setMenus(response.data);
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao buscar menus'
+        });
+      }
+    };
+
+    const fetchOrder = async () => {
+      try {
+        const response = await api.get(`/order/${tabId}`);
+        console.log(response.data); // Mostra a resposta da API para debug
+
+        const transformedOrders = response.data.map((order) => {
+          const dishes = order.dishesOrder.map((dishOrder) => ({
+            name: dishOrder.dish.name,
+            photoUrl: dishOrder.dish.photoUrl,
+            price: dishOrder.dish.price,
+            quantity: dishOrder.quantity
+          }));
+
+          const items = order.itemsOrder.map((itemOrder) => ({
+            name: itemOrder.item.name,
+            description: itemOrder.item.description,
+            cost: itemOrder.item.cost,
+            quantity: itemOrder.quantity
+          }));
+
+          return {
+            id: order.id,
+            tabId: order.tabId,
+            dishes,
+            items
+          };
+        });
+
+        setPreviousOrders(transformedOrders); // Atualiza o estado
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Erro ao buscar pedidos'
+        });
+      }
+    };
+
     fetchMenu();
-  }, []);
+    fetchOrder();
+  }, [tabId]);
 
-  const handleMenuNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setMenuName(event.target.value);
-  };
-
-  const handleMenuDescriptionChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setMenuDescription(event.target.value);
-  };
-
-  const handleOpenModal = () => {
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
+  // Adicione um useEffect para monitorar o estado previousOrders
+  useEffect(() => {
+    console.log(previousOrders); // Aqui você pode ver se previousOrders foi atualizado corretamente
+  }, [previousOrders]);
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);
   };
 
-  const toggleAccordion = (id: string) => {
-    setOpenAccordions((openAccordions) =>
-      openAccordions.includes(id)
-        ? openAccordions.filter((accordionId) => accordionId !== id)
-        : [...openAccordions, id]
-    );
-  };
-
-  const handleQuantityChange = (dishId: string, value: number) => {
+  const handleQuantityChange = (itemId: string, value: number) => {
     setQuantity((prevQuantity) => ({
       ...prevQuantity,
-      [dishId]: value
+      [itemId]: value
     }));
   };
+  const handleAddToOrder = (item: DishData | ItemData) => {
+    const itemPrice = (item as DishData).price || (item as ItemData).cost;
+    const itemQuantity = quantity[item.id] || 1;
+    const itemType = (item as DishData).price ? 'dish' : 'item'; // Determina o tipo do item
 
-  const calculateTotalNew = () => {
-    let total = 0;
+    setOrderCart((prevOrderCart) => {
+      const existingItem = prevOrderCart.find(
+        (orderItem) => orderItem.id === item.id
+      );
+      if (existingItem) {
+        return prevOrderCart.map((orderItem) =>
+          orderItem.id === item.id
+            ? { ...orderItem, quantity: orderItem.quantity + itemQuantity }
+            : orderItem
+        );
+      }
 
-    orderCart.forEach((item) => {
-      total += item.dish.price * item.quantity;
+      return [
+        ...prevOrderCart,
+        {
+          id: item.id,
+          name: item.name,
+          price: itemPrice,
+          quantity: itemQuantity,
+          type: itemType // Adiciona o tipo
+        }
+      ];
     });
-    return total;
   };
 
-  const isValidOrder = (order) =>
-    order.dishesOrder.some((item) => item.deletedAt === null);
+  const handleFinalizeOrder = async () => {
+    if (!tabId) return; // Apenas finalize pedidos com um `tabId`
 
-  // Função para calcular o total de um pedido
-  const calculateTotal = (order: any) => {
-    let total = 0;
-    order.dishesOrder.forEach((item: any) => {
-      total += item.dish.price * item.quantity;
-    });
-    return total;
-  };
-
-  const handleAddToOrder = (dish: DishData) => {
-    const dishQuantity = quantity[dish.id] || 1;
-    setOrderCart((prevOrderCart) => [
-      ...prevOrderCart,
-      { dish, quantity: dishQuantity }
-    ]);
-  };
-
-  const handleTeste = async () => {
     try {
-      const promises = orderCart.map(async (item) => {
-        // Formatar o array de pratos para enviar os dados corretos
-        return { id: item.dish.id, quantity: item.quantity };
-      });
-
-      // Aguardar todas as promessas e criar a estrutura de dados para a requisição
-      const result = await Promise.all(promises);
-
-      // Criar o objeto de dados a ser enviado na requisição
-      const formatedData = {
-        tabId: tabId, // Supondo que `tabId` já esteja definido anteriormente
-        dishes: result, // Array de pratos com `id` e `quantity`
-        status: 'ORDER_PLACED' // Adicionando o status conforme esperado na requisição
+      const formattedData = {
+        tabId,
+        dishes: orderCart
+          .filter((item) => item.type === 'dish') // Filtrar pratos
+          .map((item) => ({
+            id: item.id,
+            quantity: item.quantity
+          })),
+        items: orderCart
+          .filter((item) => item.type === 'item') // Filtrar itens
+          .map((item) => ({
+            id: item.id,
+            quantity: item.quantity
+          }))
       };
 
-      // Enviar a requisição POST para o backend
-      const response = await api.post('/order', formatedData);
-
-      // Processar a resposta
+      const response = await api.post('/order', formattedData);
 
       if (response.status === 201) {
-        router.refresh(); // Atualiza a página
-        router.push(`/dashboard/tabs`); // Redireciona para outra página
+        toast({
+          title: 'Pedido finalizado com sucesso!'
+        });
+        router.push(`/dashboard/tabs`);
       }
     } catch (error) {
-      console.error(error); // Captura e loga qualquer erro
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao finalizar pedido'
+      });
     }
   };
 
-
-  const handleRemoveFromNewOrder = (index: number) => {
-    setOrderCart((prevOrderCart) =>
-      prevOrderCart.filter((_, i) => i !== index)
-    );
-  };
-
-  const handleRemoveItemFromOrder = (orderIndex: number, dishIndex: number) => {
-    const updatedOldOrders = [...oldOrders];
-    const dishQuantity =
-      updatedOldOrders[orderIndex].dishesOrder[dishIndex].quantity;
-    if (dishQuantity > 0) {
-      updatedOldOrders[orderIndex].dishesOrder[dishIndex].quantity -= 1;
-      setOldOrders(updatedOldOrders);
-    }
-    setShowUpdateButton(true); // Mantenha o botão de "Alterar Pedido" visível
-  };
+  const totalPrice = orderCart.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
   const filteredMenus = menus.filter(
     (menu) =>
@@ -217,56 +220,12 @@ export default function Page() {
       menu.description.toLowerCase().includes(filter.toLowerCase())
   );
 
-  const handlePutOldOrder = async (orderIndex) => {
-    const obj = oldOrders[orderIndex].dishesOrder.map(async (order) => {
-      return { id: order.dish.id, quantity: order.quantity };
-    });
-
-    const result = await Promise.all(obj);
-    const formatedData = {
-      tabId: tabId,
-      dishes: result
-    };
-
-    const response = await api.put(
-      `/order/${oldOrders[orderIndex].id}`,
-      formatedData
-    );
-    if (response.status === 200) {
-      toast({
-        variant: 'primary',
-        title: 'Pedido Atualizado com sucesso'
-      });
-      router.refresh();
-      router.push(`/dashboard/tabs`);
-    }
-  };
-  const handleDeleteMenu = async () => {
-    console.log(menuId);
-    try {
-      const res = await api.delete(`/menu/${menuId}`);
-      if (res.status === 200) {
-        toast({
-          variant: 'primary',
-          title: 'Menu deletado com sucesso.'
-        });
-      }
-      router.refresh();
-      router.push('/dashboard');
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao deletar o menu.'
-      });
-    }
-  };
-
   return (
     <>
       <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        onConfirm={handleDeleteMenu}
+        isOpen={!!deletingMenuId}
+        onClose={() => setDeletingMenuId(null)}
+        onConfirm={() => {}}
         loading={false}
       />
       <ScrollArea className="h-full">
@@ -274,231 +233,248 @@ export default function Page() {
           <div className="flex items-start justify-between">
             <Heading
               title={
-                !tabId
-                  ? 'Adicionar Novo Cardápio'
-                  : `Editar Pedido da comanda ${comandNumber}`
+                tabId
+                  ? `Editar Pedido da comanda ${comandNumber}`
+                  : 'Adicionar Novo Cardápio'
               }
               description={
-                !tabId
-                  ? 'Adicione novos cardápios e gerencie os já existentes'
-                  : `Gerenciar pedidos da comanda ${comandNumber}`
+                tabId
+                  ? `Gerenciar pedidos da comanda ${comandNumber}`
+                  : 'Adicione novos cardápios e gerencie os já existentes'
               }
             />
             {!tabId && (
-              <Link
-                href={'/dashboard/menu/new'}
-                className={cn(buttonVariants({ variant: 'default' }))}
-              >
-                <Plus className="mr-2 h-4 w-4" /> Adicionar novo cardápio
-              </Link>
+              <>
+                <Link
+                  href={'/dashboard/menu/new'}
+                  className={cn(buttonVariants({ variant: 'default' }))}
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Adicionar novo cardápio
+                </Link>
+              </>
             )}
           </div>
-          <div className="mb-4 flex items-center space-x-4">
-            <Input
-              placeholder="Procure cardápio pelo nome ou descrição..."
-              value={filter}
-              onChange={handleFilterChange}
-              className="w-full md:max-w-sm"
-            />
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <Accordion type="multiple">
-              {filteredMenus.map((menu) => (
-                <AccordionItem key={menu.id} value={menu.id}>
-                  <AccordionTrigger
-                    onClick={() => toggleAccordion(menu.id)}
-                    className="text-xl"
-                  >
-                    {menu.name}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                      {menu.dishes.map((dish) => (
-                        <li key={dish.id} className="mb-4">
-                          {dish.photoUrl && (
-                            <img
-                              src={dish.photoUrl}
-                              alt={dish.name}
-                              // width={200}
-                              // height={140}
-                              style={{
-                                width: '200px',
-                                height: '140px',
-                                borderRadius: '15px'
-                              }}
-                              className="mb-5 mt-5 rounded"
-                            />
-                          )}
-                          <div>
-                            <h3 className="text-base">{dish.name}</h3>
-                            <p>Descrição: {dish.description}</p>
-                            <p>
-                              Preço:{' '}
-                              {dish.price.toLocaleString('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL'
-                              })}
-                            </p>
-                            {tabId && (
-                              <div className="mt-2 flex items-center">
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  value={quantity[dish.id] || 1}
-                                  onChange={(e) =>
-                                    handleQuantityChange(
-                                      dish.id,
-                                      parseInt(e.target.value)
-                                    )
-                                  }
-                                  className="mr-2 w-20"
-                                />
-                                <Button onClick={() => handleAddToOrder(dish)}>
-                                  Adicionar ao Pedido
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                    {!tabId && (
-                      <div className="flex justify-end pr-4">
-                        <Link
-                          href={`/dashboard/menu/${menu.id}`}
-                          className={cn(buttonVariants({ variant: 'default' }))}
-                          style={{ marginBottom: '15px' }}
-                        >
-                          Editar Menu
-                        </Link>
-                        <Button
-                          variant="destructive"
-                          className="ml-3"
-                          onClick={() => {
-                            setMenuId(menu.id);
-                            setOpen(true);
-                          }}
-                        >
-                          Excluir Menu
-                        </Button>
-                      </div>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-          {tabId && orderCart.length > 0 && (
-            <div style={{ marginTop: '80px' }}>
-              <h2 className="text-2xl font-bold">Pedido Novo</h2>
-              <ul className="mt-6">
-                {orderCart.map((item, index) => (
-                  <li
-                    key={index}
-                    className="mb-4 flex items-center justify-between border-b border-gray-100 pb-2"
-                  >
-                    <div>
-                      <h4 className="text-xl">{item.dish.name}</h4>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="mr-8">Quantidade: {item.quantity}</span>
-                      <span className="mr-8">
-                        Preço:{' '}
-                        {(item.dish.price * item.quantity).toLocaleString(
-                          'pt-BR',
-                          {
-                            style: 'currency',
-                            currency: 'BRL'
-                          }
-                        )}
-                      </span>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleRemoveFromNewOrder(index)}
-                      >
-                        Excluir
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <div style={{ textAlign: 'right', marginTop: '20px' }}>
-                <p>
-                  Total:{' '}
-                  {calculateTotalNew().toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                  })}
-                </p>
-                <Button className="mt-4" onClick={handleTeste}>
-                  Registrar pedido
-                </Button>
-              </div>
-            </div>
-          )}
-          {oldOrders.map(
-            (order, orderIndex) =>
-              isValidOrder(order) && (
-                <div key={orderIndex} className="mt-10">
-                  <h2 className="text-2xl font-bold">
-                    Pedido {orderIndex + 1}
-                  </h2>
-                  {order.dishesOrder.map(
-                    (item, dishIndex) =>
-                      item.quantity > 0 &&
-                      item.deletedAt === null && (
-                        <li
-                          key={dishIndex}
-                          className="mb-4 mt-4 flex items-center justify-between border-b border-gray-100 pb-2"
-                        >
-                          <div>
-                            <h4 className="text-xl">{item.dish.name}</h4>
-                            <p>Descrição: {item.dish.description}</p>
-                            <p>
-                              Preço:{' '}
-                              {item.dish.price.toLocaleString('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL'
-                              })}
-                            </p>
-                          </div>
-                          <Button
-                            variant="destructive"
-                            onClick={() =>
-                              handleRemoveItemFromOrder(orderIndex, dishIndex)
-                            }
+          <Accordion type="multiple">
+            {filteredMenus.map((menu) => (
+              <AccordionItem key={menu.id} value={menu.id}>
+                <AccordionTrigger>
+                  <h1 className="text-2xl font-bold">{menu.name}</h1>
+                </AccordionTrigger>
+                <AccordionContent>
+                  {menu.sections.map((section) => (
+                    <div key={section.id}>
+                      <h3 className="mb-3 text-xl">{section.name}</h3>
+                      <ul>
+                        {[...section.dishes, ...section.items].map((item) => (
+                          <li
+                            key={item.id}
+                            className="mb-4 flex items-start space-x-4 pl-2"
                           >
-                            Excluir Item
-                          </Button>
-                        </li>
-                      )
-                  )}
-                  {/* Renderizar botão de "Alterar Pedido" apenas se houver pedidos válidos */}
-                  {isValidOrder(order) && (
-                    <div className="flex justify-end">
-                      <Button onClick={() => handlePutOldOrder(orderIndex)}>
-                        Alterar Pedido
-                      </Button>
+                            {item.photoUrl && (
+                              <img
+                                src={item.photoUrl}
+                                alt={item.name}
+                                className="h-24 w-24 rounded object-cover"
+                              />
+                            )}
+                            <div>
+                              <h3 className="text-lg">{item.name}</h3>
+                              <p className="text-sm">{item.description}</p>
+                              <p className="text-base">
+                                {(item.price || item.cost).toLocaleString(
+                                  'pt-BR',
+                                  {
+                                    style: 'currency',
+                                    currency: 'BRL'
+                                  }
+                                )}
+                              </p>
+                              {tabId && (
+                                <div className="mt-2 flex items-center">
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={quantity[item.id] || 1}
+                                    onChange={(e) =>
+                                      handleQuantityChange(
+                                        item.id,
+                                        parseInt(e.target.value)
+                                      )
+                                    }
+                                    className="mr-2 w-20"
+                                  />
+                                  <Button
+                                    onClick={() => handleAddToOrder(item)}
+                                  >
+                                    Adicionar ao Pedido
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  )}
-                  {/* <div className="flex justify-end">
-                      <Button onClick={() => handleTabBill()}>
-                        Fechar Conta
-                      </Button>
-                      {}
-                    </div> */}
-                  <div style={{ textAlign: 'right', marginTop: '20px' }}>
-                    <p>
-                      Total:{' '}
-                      {calculateTotal(order).toLocaleString('pt-BR', {
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+
+          {tabId && orderCart.length > 0 && (
+            <div className="mt-6 border-t pt-4">
+              <h2 className="mb-4 text-lg font-bold">Itens no Pedido:</h2>
+              <ul>
+                {orderCart.map((item) => (
+                  <li
+                    key={item.id}
+                    className="mb-2 flex justify-between border-b pb-2"
+                  >
+                    <span>
+                      {item.name} (x{item.quantity})
+                    </span>
+                    <span>
+                      {(item.price * item.quantity).toLocaleString('pt-BR', {
                         style: 'currency',
                         currency: 'BRL'
                       })}
-                    </p>
-                  </div>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 flex justify-between font-bold">
+                <span>Total:</span>
+                <span>
+                  {totalPrice.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                  })}
+                </span>
+              </div>
+              <div className="mt-6 flex justify-end space-x-2">
+                <Button variant="destructive">Cancelar Pedido</Button>
+                <Button onClick={handleFinalizeOrder}>Finalizar Pedido</Button>
+              </div>
+            </div>
+          )}
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+
+          {previousOrders.length > 0 ? (
+            <div className="mt-10 border-t pt-4">
+              <h2 className="mb-4 text-lg font-bold">Pedidos Anteriores:</h2>
+              <div>
+                {previousOrders.map((order) => {
+                  // Calcular o total de cada pedido
+                  const orderTotal = [
+                    ...order.dishes.map((dish) => dish.price * dish.quantity),
+                    ...order.items.map((item) => item.cost * item.quantity)
+                  ].reduce((acc, cur) => acc + cur, 0);
+
+                  return (
+                    <div key={order.id} className="mb-4 border-b pb-4">
+                      {/* Renderizar apenas se houver pratos */}
+                      {order.dishes.length > 0 && (
+                        <div className="mt-2">
+                          <h4 className="text-lg font-semibold">Pratos:</h4>
+                          <ul>
+                            {order.dishes.map((dish, index) => (
+                              <li
+                                key={index}
+                                className="mb-2 flex justify-between"
+                              >
+                                <span>
+                                  {dish.name} (x{dish.quantity})
+                                </span>
+                                <span>
+                                  {(dish.price * dish.quantity).toLocaleString(
+                                    'pt-BR',
+                                    {
+                                      style: 'currency',
+                                      currency: 'BRL'
+                                    }
+                                  )}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Renderizar apenas se houver itens */}
+                      {order.items.length > 0 && (
+                        <div className="mt-2">
+                          <h4 className="text-lg font-semibold">Itens:</h4>
+                          <ul>
+                            {order.items.map((item, index) => (
+                              <li
+                                key={index}
+                                className="mb-2 flex justify-between"
+                              >
+                                <span>
+                                  {item.name} (x{item.quantity})
+                                </span>
+                                <span>
+                                  {(item.cost * item.quantity).toLocaleString(
+                                    'pt-BR',
+                                    {
+                                      style: 'currency',
+                                      currency: 'BRL'
+                                    }
+                                  )}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="mt-4 flex justify-between font-bold">
+                        <span>Total do Pedido:</span>
+                        <span>
+                          {orderTotal.toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Calcular o total geral */}
+                <div className="mt-6 flex justify-between font-bold">
+                  <span>Total Geral:</span>
+                  <span>
+                    {previousOrders
+                      .map((order) => {
+                        return [
+                          ...order.dishes.map(
+                            (dish) => dish.price * dish.quantity
+                          ),
+                          ...order.items.map(
+                            (item) => item.cost * item.quantity
+                          )
+                        ];
+                      })
+                      .flat()
+                      .reduce((acc, cur) => acc + cur, 0)
+                      .toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                      })}
+                  </span>
                 </div>
-              )
+              </div>
+            </div>
+          ) : (
+            <div className="mt-6 text-center"></div>
           )}
         </div>
       </ScrollArea>

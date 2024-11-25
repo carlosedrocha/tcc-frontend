@@ -20,14 +20,15 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { AlertModal } from '../modal/alert-modal';
 import { useToast } from '../ui/use-toast';
-import { DishesSelect } from '../multi-selected/dishes-select';
+import { SectionSelect } from '../multi-selected/section-select';
+import { MenuSelect } from '../multi-selected/menu-select';
 
 const formSchema = z.object({
   name: z
     .string()
     .min(3, { message: 'Item name must be at least 3 characters' }),
   description: z.string(),
-  dishesId: z.array(z.string())
+  sectionId: z.array(z.string())
 });
 
 type MenuFormValues = z.infer<typeof formSchema>;
@@ -63,21 +64,24 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
   // Efeito para buscar os pratos ao carregar a página
   useEffect(() => {
     fetchDishes();
-    if (params['menuId'] && params['menuId'] !== 'new') {
-      fetchMenuData(params['menuId']); // Chama a função quando a página carrega
-    }
-  }, [params['menuId']]); // A dependência garante que o efeito rode sempre que menuId mudar
+  }, []);
+  const title = initialData ? 'Editar Cardápio' : 'Criar Cardápio';
+  const description = initialData
+    ? 'Editar Cardápio'
+    : 'Adicionar novo Cardápio';
+  const toastMessage = initialData ? 'Atualizado' : 'Criado';
+  const action = initialData ? 'Salvar' : 'Criar';
+  const [sections, setSections] = useState([]);
 
-  // Função para buscar os pratos
   const fetchDishes = async () => {
     try {
-      const response = await api.get('/dish');
+      const response = await api.get('/section');
       if (response.status === 200) {
         const formattedData = response.data.map((dish: any) => ({
           id: dish.id,
           name: dish.name
         }));
-        setDishes(formattedData);
+        setSections(formattedData);
       }
     } catch (error) {
       console.error(error);
@@ -138,8 +142,11 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
         const response = await api.post('/menu', {
           name: data.name,
           description: data.description,
-          dishIds: data.dishesId
+          sections: data.sectionId.map((sectionId: string) => ({
+            id: [sectionId] // Envia cada sectionId dentro de um array, como esperado pelo backend
+          }))
         });
+
         if (response.status === 201) {
           reloadPage();
           toast({
@@ -151,7 +158,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
         const response = await api.put(`/menu/${params['menuId']}`, {
           name: data.name,
           description: data.description,
-          dishIds: data.dishesId
+          sections: data.sectionId
         });
         if (response.status === 200) {
           reloadPage();
@@ -256,10 +263,10 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
           />
           <FormField
             control={form.control}
-            name="dishesId"
+            name="sectionId"
             render={({ field }) => (
-              <DishesSelect
-                dishes={dishes}
+              <SectionSelect
+                sections={sections}
                 value={field.value}
                 onValueChange={(value) => {
                   field.onChange(value);
@@ -267,6 +274,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
               />
             )}
           />
+
           <Button disabled={loading} className="ml-auto" type="submit">
             {params['menuId'] === 'new' ? 'Criar' : 'Salvar'}
           </Button>
