@@ -138,6 +138,7 @@ function CardDemo({
         </div>
       </CardContent>
       <CardFooter>
+        
         <Button className="w-full" onClick={markAllAsRead}>
           <Check className="mr-2 h-4 w-4" /> Marcar todas como lidas
         </Button>
