@@ -39,7 +39,10 @@ import {
   UserX2Icon,
   Utensils,
   ListMusic,
-  X
+  X,
+  CircleDollarSign,
+  Package,
+  Users
 } from 'lucide-react';
 
 export type Icon = LucideIcon;
@@ -82,6 +85,10 @@ export const Icons = {
   clipboardList: ClipboardList,
   conciergeBell: ConciergeBell,
   logout: LogOut,
+  dolarSign: CircleDollarSign,
+  package: Package,
+  users: Users,
+
 
   gitHub: ({ ...props }: LucideProps) => (
     <svg

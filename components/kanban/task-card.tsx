@@ -9,11 +9,18 @@ import { Badge } from '../ui/badge';
 interface TaskCardProps {
   task: {
     id: string;
-    status: string;
+    status: string | null; // O status pode ser null
+    tab: {
+      id: string;
+      tabNumber: number; // Número da tab
+      total: number | null; // O total pode ser null
+      status: string; // O status do tab
+    };
     dishesOrder: {
       dish: {
-        name: string;
+        name: string; // Nome do prato
       };
+      createdAt: string; // Campo para a data de criação
     }[];
     title?: string; // Torne 'title' opcional
   };
@@ -77,12 +84,28 @@ export function TaskCard({ task, isOverlay, data }: TaskCardProps) {
         </Badge>
       </CardHeader>
       <CardContent className="whitespace-pre-wrap px-3 pb-6 pt-3 text-left">
+        {/* Exibindo o número da tab */}
+        <div className="mb-3">
+          <span className="font-semibold">Número da comanda: </span>
+          {task.tab.tabNumber} {/* Exibindo o número da tab */}
+        </div>
+
+        {/* Exibindo o nome do prato e a data de criação */}
         <ul>
           {task.dishesOrder.map((order, index) => (
-            <li key={index}>{order.dish.name}</li> // Exibindo o nome do prato
+            <li key={index} className="mb-2">
+              <div>
+                <span className="font-semibold">Pedido: </span>
+                {order.dish.name} {/* Exibindo nome do prato */}
+              </div>
+              <div>
+                <span className="font-semibold">Horário do pedido: </span>
+                {new Date(order.createdAt).toLocaleTimeString()}
+                {/* Exibindo a data de criação */}
+              </div>
+            </li>
           ))}
         </ul>
-        {/* Você pode usar a propriedade data aqui, se necessário */}
       </CardContent>
     </Card>
   );

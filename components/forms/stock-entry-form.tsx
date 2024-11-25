@@ -361,9 +361,27 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      type="text"
+                      placeholder="R$: 0,00" // Exemplo de placeholder formatado
+                      value={
+                        field.value
+                          ? `R$ ${Number(field.value).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })}` // Formata o valor como moeda brasileira
+                          : ''
+                      }
+                      onChange={(e) => {
+                        // Remove tudo que não seja número ou vírgula
+                        const rawValue = e.target.value.replace(/[^\d,]/g, '');
+
+                        // Substitui vírgula por ponto e converte para número
+                        const numericValue =
+                          parseFloat(rawValue.replace(',', '.')) || 0;
+
+                        // Atualiza o campo no formulário com o valor numérico formatado
+                        field.onChange(numericValue.toFixed(2));
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
