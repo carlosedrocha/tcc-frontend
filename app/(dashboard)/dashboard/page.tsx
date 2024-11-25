@@ -82,11 +82,11 @@ export default function Page() {
       <HeroComponent />
       {/* <h1>Mesas Abertas:</h1>
       <br /> */}
-      <CardDemo
+      {/* <CardDemo
         notifications={notifications}
         markAllAsRead={markAllAsRead}
         unreadCount={unreadCount}
-      />
+      /> */}
     </div>
   );
 }

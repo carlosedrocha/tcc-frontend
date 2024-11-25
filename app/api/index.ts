@@ -51,21 +51,5 @@ api.interceptors.response.use(
   }
 );
 
-// Função para verificar permissão
-export const hasPermission = (permissionName: any) => {
-  const user = JSON.parse(sessionStorage.getItem('userId'));
-  const userRole = JSON.parse(sessionStorage.getItem('role'));
-  const userPermissions = JSON.parse(sessionStorage.getItem('permissions'));
-
-  if (!user || !userRole || !userPermissions) {
-    return false; // Caso não exista um usuário logado ou permissões
-  }
-
-  // Verificar se o usuário possui a permissão específica
-  return userPermissions.some(
-    (permission: any) => permission.name === permissionName
-  );
-};
-
 //module.exports = api;
 export default api;

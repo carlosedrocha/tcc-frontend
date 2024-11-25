@@ -210,18 +210,6 @@ export const navItems: NavItem[] = [
   {
     title: 'Funcionários',
     href: '/dashboard/employee',
-    icon: 'users',
-    label: 'employee'
-  },
-  {
-    title: 'Gastos',
-    href: '/dashboard/expense',
-    icon: 'dolarSign',
-    label: 'employee'
-  },
-  {
-    title: 'Entrada Estoque',
-    href: '/dashboard/stock',
     icon: 'employee',
     label: 'employee',
     permission: 'employee:read'
@@ -245,7 +233,7 @@ export const navItems: NavItem[] = [
     href: '/dashboard/waiter-bell',
     icon: 'conciergeBell',
     label: 'bell',
-    permission: 'waiter' // Sem uma permissão correspondente no retorno
+    permission: 'waiter-bell:read' // Sem uma permissão correspondente no retorno
   },
   {
     title: 'Financeiro - Relatório',

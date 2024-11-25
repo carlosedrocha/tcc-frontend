@@ -112,7 +112,7 @@ export function StockEntryTable<TData, TValue>({
               ))}
             </SelectContent>
           </Select>
-          <span className="text-sm text-muted-foreground">Entradas</span>
+          {/* <span className="text-sm text-muted-foreground">Entradas</span> */}
         </div>
       </div>
       <ScrollArea className="h-[400px] rounded-md">

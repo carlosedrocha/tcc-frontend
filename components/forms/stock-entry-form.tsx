@@ -29,13 +29,16 @@ import { useToast } from '../ui/use-toast';
 
 // Definição do schema para validação dos campos
 const formSchema = z.object({
-  quantity: z.number().min(1, { message: 'Quantidade é obrigatória' }),
+  quantity: z.number({
+    required_error: 'Quantidade é obrigatória',
+    invalid_type_error: 'A quantidade deve ser um número'
+  }),
   itemId: z.string().min(1, { message: 'Item é obrigatório' }), // Campo itemId
   transaction: z.object({
-    type: z.enum(['SALE', 'EXPENSE', 'INCOME', 'PAYMENT'], {
+    type: z.enum(['EXPENSE', 'INCOME'], {
       required_error: 'Tipo de transação é obrigatório'
     }),
-    description: z.string().min(1, { message: 'Descrição é obrigatória' }),
+    description: z.string().optional(),
     amount: z
       .number()
       .min(0, { message: 'Valor deve ser maior ou igual a zero' }),
@@ -66,7 +69,7 @@ interface StockEntryFormProps {
 }
 
 // Hook para buscar dados da entrada de estoque
-const useStockEntryData = (id) => {
+const useStockEntryData = (id: string) => {
   const { toast } = useToast();
   const [stockEntryData, setStockEntryData] = useState();
   const initialDataRef = useRef(null);
@@ -152,8 +155,8 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
   const stockItems = useStockItems(); // Itens de estoque
 
   const title = initialData
-    ? 'Editar Entrada de Estoque'
-    : 'Adicionar Entrada de Estoque';
+    ? 'Editar movimentação de Estoque'
+    : 'Adicionar movimentação de Estoque';
   const toastMessage = initialData
     ? 'Entrada de Estoque Atualizada.'
     : 'Entrada de Estoque Criada.';

@@ -1,13 +1,12 @@
 'use client';
 
-import { hasPermission } from '@/app/api';
 import { Icons } from '@/components/icons';
 import { useSidebar } from '@/hooks/useSidebar';
 import { cn } from '@/lib/utils';
 import { NavItem } from '@/types';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
   Tooltip,
   TooltipContent,
@@ -32,6 +31,22 @@ export function DashboardNav({
   if (!items?.length) {
     return null;
   }
+
+  // Função para verificar permissão
+  const [userPermissions, setUserPermissions] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const permissions = sessionStorage.getItem('permissions');
+      setUserPermissions(permissions ? JSON.parse(permissions) : []);
+    }
+  }, []);
+
+  const hasPermission = (permissionName: string) => {
+    return userPermissions.some(
+      (permission: any) => permission.name === permissionName
+    );
+  };
 
   return (
     <nav className="grid items-start gap-2">
