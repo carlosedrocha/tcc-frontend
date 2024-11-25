@@ -205,7 +205,9 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
             disabled={loading}
             variant="destructive"
             size="sm"
-            onClick={() => {/* Lógica de exclusão */}}
+            onClick={() => {
+              /* Lógica de exclusão */
+            }}
           >
             <Trash className="h-4 w-4" />
           </Button>
@@ -213,7 +215,10 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
       </div>
       <Separator />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="w-full space-y-8"
+        >
           <div className="gap-8 md:grid md:grid-cols-3">
             {/* Campo para selecionar o item */}
             <FormField
@@ -229,7 +234,10 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                       defaultValue={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue defaultValue={field.value} placeholder="Selecione um item" />
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Selecione um item"
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {stockItems.map((stockEntry) => (
@@ -265,7 +273,10 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
             />
           </div>
           <Separator />
-          <Heading title="Informações da Transação" description="Detalhes da transação financeira" />
+          <Heading
+            title="Informações da Transação"
+            description="Detalhes da transação financeira"
+          />
           {/* Campos da transação */}
           <div className="gap-8 md:grid md:grid-cols-3">
             {/* Tipo de transação */}
@@ -324,9 +335,27 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                   <FormControl>
                     <Input
                       disabled={loading}
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      type="text"
+                      placeholder="R$: 0,00" // Exemplo de placeholder formatado
+                      value={
+                        field.value
+                          ? `R$ ${Number(field.value).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })}` // Formata o valor como moeda brasileira
+                          : ''
+                      }
+                      onChange={(e) => {
+                        // Remove tudo que não seja número ou vírgula
+                        const rawValue = e.target.value.replace(/[^\d,]/g, '');
+
+                        // Substitui vírgula por ponto e converte para número
+                        const numericValue =
+                          parseFloat(rawValue.replace(',', '.')) || 0;
+
+                        // Atualiza o campo no formulário com o valor numérico formatado
+                        field.onChange(numericValue.toFixed(2));
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -408,8 +437,12 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="CASH">Dinheiro</SelectItem>
-                        <SelectItem value="CREDIT_CARD">Cartão de Crédito</SelectItem>
-                        <SelectItem value="DEBIT_CARD">Cartão de Débito</SelectItem>
+                        <SelectItem value="CREDIT_CARD">
+                          Cartão de Crédito
+                        </SelectItem>
+                        <SelectItem value="DEBIT_CARD">
+                          Cartão de Débito
+                        </SelectItem>
                         <SelectItem value="PIX">PIX</SelectItem>
                         <SelectItem value="TRANSFER">Transferência</SelectItem>
                       </SelectContent>
@@ -421,7 +454,10 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({ initialData }) =
             />
           </div>
           <Separator />
-          <Heading title="Movimentação de Estoque" description="Detalhes da movimentação" />
+          <Heading
+            title="Movimentação de Estoque"
+            description="Detalhes da movimentação"
+          />
           {/* Movimento de Estoque */}
           <div className="gap-8 md:grid md:grid-cols-3">
             {/* Tipo de Movimentação */}

@@ -174,24 +174,35 @@ export default function Page() {
   const handleTeste = async () => {
     try {
       const promises = orderCart.map(async (item) => {
+        // Formatar o array de pratos para enviar os dados corretos
         return { id: item.dish.id, quantity: item.quantity };
       });
 
+      // Aguardar todas as promessas e criar a estrutura de dados para a requisição
       const result = await Promise.all(promises);
+
+      // Criar o objeto de dados a ser enviado na requisição
       const formatedData = {
-        tabId: tabId,
-        dishes: result
+        tabId: tabId, // Supondo que `tabId` já esteja definido anteriormente
+        dishes: result, // Array de pratos com `id` e `quantity`
+        status: 'ORDER_PLACED' // Adicionando o status conforme esperado na requisição
       };
+
+      // Enviar a requisição POST para o backend
       const response = await api.post('/order', formatedData);
+
+      // Processar a resposta
+      console.log('me ajuda deus', response.data);
+
       if (response.status === 201) {
-        router.refresh();
-        router.push(`/dashboard/tabs`);
+        router.refresh(); // Atualiza a página
+        router.push(`/dashboard/tabs`); // Redireciona para outra página
       }
-      // Aqui você pode enviar o resultado para o backend
     } catch (error) {
-      console.error(error);
+      console.error(error); // Captura e loga qualquer erro
     }
   };
+
 
   const handleRemoveFromNewOrder = (index: number) => {
     setOrderCart((prevOrderCart) =>
