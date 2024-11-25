@@ -1,4 +1,5 @@
 'use client';
+import api from '@/app/api';
 import { AlertModal } from '@/components/modal/alert-modal';
 import {
   Accordion,
@@ -63,14 +64,18 @@ export default function Page() {
   const [filter, setFilter] = useState('');
   const [quantity, setQuantity] = useState<Record<string, number>>({});
   const [orderCart, setOrderCart] = useState<OrderItem[]>([]);
-  const [deletingMenuId, setDeletingMenuId] = useState<string | null>(null);
+  const [deletingMenuId, setDeletingMenuId] = useState<string>('');
   const [previousOrders, setPreviousOrders] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchMenu = async () => {
       try {
         const response = await api.get('/menu');
-        setMenus(response.data);
+        const filteredMenus = tabId
+          ? response.data.filter((menu) => !menu.disabled)
+          : response.data;
+        console.log(filteredMenus);
+        setMenus(filteredMenus);
       } catch (error) {
         toast({
           variant: 'destructive',
@@ -119,6 +124,21 @@ export default function Page() {
     fetchMenu();
     fetchOrder();
   }, [tabId]);
+  const handleDeleteMenu = async (menuId: string) => {
+    try {
+      await api.delete(`/menu/${menuId}`);
+      setMenus((prevMenus) => prevMenus.filter((menu) => menu.id !== menuId));
+      setDeletingMenuId('');
+      toast({
+        title: 'Cardápio excluído com sucesso!'
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao excluir cardápio'
+      });
+    }
+  };
 
   // Adicione um useEffect para monitorar o estado previousOrders
   useEffect(() => {
@@ -216,8 +236,10 @@ export default function Page() {
     <>
       <AlertModal
         isOpen={!!deletingMenuId}
-        onClose={() => setDeletingMenuId(null)}
-        onConfirm={() => {}}
+        onClose={() => setDeletingMenuId('')}
+        onConfirm={() => {
+          handleDeleteMenu(deletingMenuId);
+        }}
         loading={false}
       />
       <ScrollArea className="h-full">
@@ -308,6 +330,25 @@ export default function Page() {
                       </ul>
                     </div>
                   ))}
+                  {!tabId && (
+                    <>
+                      <Button
+                        variant="destructive"
+                        onClick={() => setDeletingMenuId(menu.id)}
+                      >
+                        Excluir Cardápio
+                      </Button>
+                      <Button
+                        variant="default"
+                        className="ml-4"
+                        onClick={() =>
+                          router.push(`/dashboard/menu/${menu.id}`)
+                        }
+                      >
+                        Editar Cardápio
+                      </Button>
+                    </>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             ))}

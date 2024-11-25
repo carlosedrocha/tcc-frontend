@@ -27,8 +27,9 @@ const formSchema = z.object({
   name: z
     .string()
     .min(3, { message: 'Item name must be at least 3 characters' }),
-  description: z.string(),
-  sectionId: z.array(z.string())
+  description: z.string().optional(),
+  sectionId: z.array(z.string()).optional(),
+  disabled: z.boolean().optional()
 });
 
 type MenuFormValues = z.infer<typeof formSchema>;
@@ -155,9 +156,16 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
           });
         }
       } else {
+        console.log({
+          name: data.name,
+          description: data.description,
+          disabled: data.disabled === undefined ? false : data.disabled,
+          sections: data.sectionId
+        });
         const response = await api.put(`/menu/${params['menuId']}`, {
           name: data.name,
           description: data.description,
+          disabled: data.disabled === undefined ? false : data.disabled,
           sections: data.sectionId
         });
         if (response.status === 200) {
@@ -272,6 +280,32 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
                   field.onChange(value);
                 }}
               />
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="disabled"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div className="flex items-center space-x-2">
+                    {params['menuId'] !== 'new' && (
+                      <>
+                        <input
+                          type="checkbox"
+                          checked={field.value || false}
+                          onChange={(e) => {
+                            field.onChange(e.target.checked);
+                          }}
+                          disabled={loading}
+                          className="ml-6 h-4 w-4"
+                        />
+                        <span>Desativar Seção</span>
+                      </>
+                    )}
+                  </div>
+                </FormControl>
+              </FormItem>
             )}
           />
 
