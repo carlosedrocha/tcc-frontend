@@ -28,7 +28,7 @@ type UserFormValue = z.infer<typeof formSchema>;
 
 export default function UserAuthForm() {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const router = useRouter(); // Hook de navegação
 
   const defaultValues = {
     email: 'admin@admin.com',
@@ -48,51 +48,17 @@ export default function UserAuthForm() {
       const response = await api.post('/auth/local/signin', data);
       if (response.status === 200) {
         const { user } = response.data;
-
-        // if (user.role.name === 'client' || user.role.name === 'customer') {
-        //   alert('Você não tem permissão para acessar essa área');
-        //   return;
-        // }
         const { id: userId, email, entity } = user;
         const { firstName, lastName } = entity;
 
-        // Criar o objeto 'user'
         const userData = {
           userId,
           name: `${firstName} ${lastName}`, // Concatena o nome completo
           email
         };
 
-        // Armazenar o usuário no estado e localStorage
         localStorage.setItem('user', JSON.stringify(userData));
-
-        // Redirecionar para o dashboard
-        router.push('/dashboard');
-        // sessionStorage.removeItem('token');
-        //sessionStorage.removeItem('name');
-        // sessionStorage.removeItem('userId');
-        const token = response.data.bearer_token;
-        //const name = response.data.user.name;
-        // const userId = response.data.userId;
-
-        // const email = response.data?.user?.email;
-
-        // const name = `${response.data?.user?.entity?.firstName} ${response.data?.user?.entity?.lastName}`;
-
-        const role = response.data?.user?.role?.name;
-
-        const permissions = response.data?.user?.role?.permissions;
-
-        sessionStorage.setItem('token', JSON.stringify(token));
-        //sessionStorage.setItem('name', JSON.stringify(name));
-        sessionStorage.setItem('userId', JSON.stringify(userId));
-        //sessionStorage.setItem('email', JSON.stringify(data.email));
-        //  sessionStorage.setItem('email', JSON.stringify(email));
-        // sessionStorage.setItem('name', JSON.stringify(name));
-        sessionStorage.setItem('role', JSON.stringify(role));
-        sessionStorage.setItem('permissions', JSON.stringify(permissions));
-
-        window.location.href = '/dashboard';
+        router.push('/dashboard'); // Redireciona para o dashboard após login bem-sucedido
       }
     } catch (error) {
       console.error(error);
@@ -144,6 +110,15 @@ export default function UserAuthForm() {
 
         <Button disabled={loading} className="ml-auto w-full" type="submit">
           Realizar Login
+        </Button>
+
+        {/* Segundo botão para redirecionamento */}
+        <Button
+          disabled={loading}
+          className="ml-auto w-full"
+          onClick={() => router.push('/client_form')} // Redireciona para /client_form
+        >
+          Redirecionar para o Formulário
         </Button>
       </form>
     </Form>
