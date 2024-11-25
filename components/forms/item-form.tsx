@@ -184,6 +184,44 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
     }
   };
 
+  useEffect(() => {
+    const fetchItemById = async () => {
+      if (urlId && urlId !== 'new') {
+        // Verifica se não é um novo item
+        try {
+          const response = await api.get(`/item/${urlId}`); // Faz a requisição ao endpoint
+          const itemData = response.data;
+          // Atualiza os valores do formulário com os dados recebidos
+          form.reset({
+            name: itemData.name || '',
+            description: itemData.description || '',
+            measurementUnit: itemData.measurementUnit || '',
+            measurementUnitValue:
+              itemData.measurementUnitValue?.toString() || '',
+            price: itemData.cost?.toString() || '',
+            typeId: itemData.type?.id || ''
+          });
+        } catch (error) {
+          toast({
+            variant: 'destructive',
+            title: 'Erro ao buscar o item',
+            description:
+              'Não foi possível carregar os dados do item. Tente novamente mais tarde.'
+          });
+        }
+      }
+    };
+
+    fetchItemById();
+  }, [urlId, form, toast]);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
   return (
     <>
       {/* <AlertModal
@@ -238,12 +276,12 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value} // Garantir que o "value" esteja correto (id do tipo)
                   >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
-                          defaultValue={field.value}
+                          value={field.value} // Aqui, o valor será o ID do tipo de item selecionado.
                           placeholder="Selecione uma categoria"
                         />
                       </SelectTrigger>
@@ -273,14 +311,32 @@ export const ItemForm: React.FC<ItemForm> = ({ initialData }) => {
                       type="text"
                       disabled={loading}
                       placeholder="R$: 35,00"
-                      value={field.value ?? ''} // Usando o operador de coalescência nula para garantir que o valor seja definido
-                      onChange={field.onChange} // Passando a função onChange diretamente
+                      value={
+                        field.value
+                          ? `R$ ${Number(field.value).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })}` // Formata como moeda brasileira
+                          : ''
+                      }
+                      onChange={(e) => {
+                        // Remove tudo que não seja número ou vírgula
+                        const rawValue = e.target.value.replace(/[^\d,]/g, '');
+
+                        // Substitui vírgula por ponto e converte para número
+                        const numericValue =
+                          parseFloat(rawValue.replace(',', '.')) || 0;
+
+                        // Atualiza o campo no formulário como string numérica
+                        field.onChange(numericValue.toFixed(2));
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="measurementUnitValue"

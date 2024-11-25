@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import api from '@/app/api';
+import { AlertModal } from '@/components/modal/alert-modal';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -9,17 +9,16 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
+import { Heading } from '@/components/ui/heading';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Modal } from '@/components/ui/modal';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Heading } from '@/components/ui/heading';
-import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
-import api from '@/app/api';
 import { useToast } from '@/components/ui/use-toast';
-import { AlertModal } from '@/components/modal/alert-modal';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface TabCardData {
   id: string;
@@ -167,7 +166,7 @@ export default function Page() {
     try {
       setOpen(false);
       try {
-        const response = await api.put(`/tab/close/${idFinish}`);
+        const response = await api.put(`/tab/bill/${idFinish}`);
         if (response.status === 200) {
           reloadPage();
         }
@@ -216,7 +215,7 @@ export default function Page() {
               title="Adicionar Nova Comanda"
               description="Adicione novas comandas e gerencie as criadas"
             />
-            <Button onClick={handleOpenModal}>Adicionar Nova Comanda</Button>
+            <Button onClick={handleOpenModal}>Abrir nova Comanda</Button>
           </div>
           <div className="flex items-center space-x-4">
             <Input
@@ -255,7 +254,7 @@ export default function Page() {
                       variant="destructive"
                       onClick={() => handleFinishTab(tab.id)}
                     >
-                      Finalizar
+                      Fechar
                     </Button>
                   )}
                 </CardContent>

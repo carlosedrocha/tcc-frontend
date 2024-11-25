@@ -39,7 +39,10 @@ import {
   UserX2Icon,
   Utensils,
   ListMusic,
-  X
+  X,
+  CircleDollarSign,
+  Package,
+  Users
 } from 'lucide-react';
 
 export type Icon = LucideIcon;
@@ -50,7 +53,7 @@ export const Icons = {
   login: LogIn,
   sandwich: Sandwich,
   close: X,
-  song:ListMusic,
+  song: ListMusic,
   home: Home,
   profile: User2Icon,
   spinner: Loader2,
@@ -80,9 +83,13 @@ export const Icons = {
   beef: Beef,
   scrollText: ScrollText,
   clipboardList: ClipboardList,
-  conciergeBell:ConciergeBell,
-  logout:LogOut,
-  
+  conciergeBell: ConciergeBell,
+  logout: LogOut,
+  dolarSign: CircleDollarSign,
+  package: Package,
+  users: Users,
+
+
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

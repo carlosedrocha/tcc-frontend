@@ -1,13 +1,6 @@
 'use client';
+
 import ThemeToggle from '@/components/layout/ThemeToggle/theme-toggle';
-import { cn } from '@/lib/utils';
-import { MobileSidebar } from './mobile-sidebar';
-import { UserNav } from './user-nav';
-import Link from 'next/link';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Bell } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import io from 'socket.io-client';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,7 +10,14 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Bell, Check } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import io from 'socket.io-client';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { MobileSidebar } from './mobile-sidebar';
+import { UserNav } from './user-nav';
 
 let socket: ReturnType<typeof io> | null = null;
 
@@ -28,15 +28,16 @@ export default function Header() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
+    // Load stored notifications
     const storedNotifications = localStorage.getItem('notifications');
     if (storedNotifications) {
       const parsedNotifications = JSON.parse(storedNotifications);
       setNotifications(parsedNotifications);
-      setUnreadCount(parsedNotifications.filter((n: any) => !n.read).length);
+      setUnreadCount(parsedNotifications.filter((n) => !n.read).length);
     }
 
+    // Initialize WebSocket connection
     socket = io('http://localhost:3333');
-
     socket.on('connect', () => {
       console.log('Conectado ao servidor WebSocket');
     });
@@ -66,6 +67,13 @@ export default function Header() {
     };
   }, []);
 
+  const logoClickHandler = () => {
+    if (typeof window !== 'undefined') {
+      const userLoggedIn = Boolean(localStorage.getItem('user'));
+      window.location.href = userLoggedIn ? '/dashboard' : '/home';
+    }
+  };
+
   const markAllAsRead = () => {
     setNotifications((prevNotifications) =>
       prevNotifications.map((notification) => ({
@@ -74,27 +82,32 @@ export default function Header() {
       }))
     );
     setUnreadCount(0);
-    localStorage.removeItem('notifications');
+    localStorage.setItem(
+      'notifications',
+      JSON.stringify(
+        notifications.map((notification) => ({
+          ...notification,
+          read: true
+        }))
+      )
+    );
   };
 
   return (
     <div className="supports-backdrop-blur:bg-background/60 fixed left-0 right-0 top-0 z-20 border-b bg-background/95 backdrop-blur">
       <nav className="flex h-14 items-center justify-between px-4">
         <div className="hidden lg:block">
-          <svg viewBox="0 0 50 50" className="mr-2 h-9 w-9">
-            <image
-              href="https://brew-master-dev.s3.us-east-2.amazonaws.com/FundoTrasnparenteLogo.png"
-              x="0"
-              y="0"
-              height="50"
-              width="50"
-            />
-          </svg>
+          <Image
+            src="https://brew-master-dev.s3.us-east-2.amazonaws.com/FundoTrasnparenteLogo.png"
+            height={50}
+            width={50}
+            alt="company logo"
+            onClick={logoClickHandler}
+          />
         </div>
         <div className={cn('block lg:!hidden')}>
           <MobileSidebar />
         </div>
-
         <div className="flex items-center gap-2">
           <UserNav />
           <Popover>
@@ -110,7 +123,6 @@ export default function Header() {
             </PopoverTrigger>
             <PopoverContent className="flex w-[320px] -translate-x-10 justify-center p-2">
               <CardDemo
-                className="w-[320px]"
                 notifications={notifications}
                 markAllAsRead={markAllAsRead}
                 unreadCount={unreadCount}
@@ -124,51 +136,43 @@ export default function Header() {
   );
 }
 
-type CardProps = React.ComponentProps<typeof Card> & {
+type CardProps = {
   notifications: { title: string; description: string; read: boolean }[];
   markAllAsRead: () => void;
   unreadCount: number;
 };
 
-function CardDemo({
-  className,
-  notifications,
-  markAllAsRead,
-  unreadCount,
-  ...props
-}: CardProps) {
+function CardDemo({ notifications, markAllAsRead, unreadCount }: CardProps) {
   const displayedNotifications = notifications.slice(0, 5);
 
   return (
-    <Card className={cn('w-[380px]', className)} {...props}>
+    <Card className="w-[380px]">
       <CardHeader>
         <CardTitle>Notificações</CardTitle>
         <CardDescription>{unreadCount} novas notificações.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        <div>
-          {displayedNotifications.map((notification, index) => (
-            <div
-              key={index}
-              className="mb-4 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
-            >
-              <span
-                className={cn(
-                  'flex h-2 w-2 translate-y-1 rounded-full bg-sky-500',
-                  notification.read && 'invisible'
-                )}
-              />
-              <div className="space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {notification.title}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {notification.description}
-                </p>
-              </div>
+        {displayedNotifications.map((notification, index) => (
+          <div
+            key={index}
+            className="mb-4 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
+          >
+            <span
+              className={cn(
+                'flex h-2 w-2 translate-y-1 rounded-full bg-sky-500',
+                notification.read && 'invisible'
+              )}
+            />
+            <div className="space-y-1">
+              <p className="text-sm font-medium leading-none">
+                {notification.title}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {notification.description}
+              </p>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </CardContent>
       <CardFooter>
         <Button className="w-full" onClick={markAllAsRead}>

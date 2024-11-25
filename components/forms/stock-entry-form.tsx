@@ -29,13 +29,16 @@ import { useToast } from '../ui/use-toast';
 
 // Definição do schema para validação dos campos
 const formSchema = z.object({
-  quantity: z.number().min(1, { message: 'Quantidade é obrigatória' }),
+  quantity: z.number({
+    required_error: 'Quantidade é obrigatória',
+    invalid_type_error: 'A quantidade deve ser um número'
+  }),
   itemId: z.string().min(1, { message: 'Item é obrigatório' }), // Campo itemId
   transaction: z.object({
-    type: z.enum(['SALE', 'EXPENSE', 'INCOME', 'PAYMENT'], {
+    type: z.enum(['EXPENSE', 'INCOME'], {
       required_error: 'Tipo de transação é obrigatório'
     }),
-    description: z.string().min(1, { message: 'Descrição é obrigatória' }),
+    description: z.string().optional(),
     amount: z
       .number()
       .min(0, { message: 'Valor deve ser maior ou igual a zero' }),
@@ -66,7 +69,7 @@ interface StockEntryFormProps {
 }
 
 // Hook para buscar dados da entrada de estoque
-const useStockEntryData = (id) => {
+const useStockEntryData = (id: string) => {
   const { toast } = useToast();
   const [stockEntryData, setStockEntryData] = useState();
   const initialDataRef = useRef(null);
@@ -152,8 +155,8 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
   const stockItems = useStockItems(); // Itens de estoque
 
   const title = initialData
-    ? 'Editar Entrada de Estoque'
-    : 'Adicionar Entrada de Estoque';
+    ? 'Editar movimentação de Estoque'
+    : 'Adicionar movimentação de Estoque';
   const toastMessage = initialData
     ? 'Entrada de Estoque Atualizada.'
     : 'Entrada de Estoque Criada.';
@@ -165,7 +168,7 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
         quantity: 1,
         itemId: '',
         transaction: {
-          type: 'SALE',
+          type: 'INCOME',
           description: '',
           amount: 0,
           category: 'OTHER',
@@ -190,11 +193,11 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
   const onSubmit = async (data: StockEntryFormValues) => {
     try {
       setLoading(true);
-      //console.log(data)
+      console.log(data);
       const payload = {
         quantity: Number(data.quantity),
         transaction: {
-          type: data.transaction.type,
+          type: 'INCOME',
           description: data.transaction.description,
           amount: Number(data.transaction.amount),
           category: data.transaction.category,
@@ -361,9 +364,27 @@ export const StockEntryForm: React.FC<StockEntryFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={loading}
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      type="text"
+                      placeholder="R$: 0,00" // Exemplo de placeholder formatado
+                      value={
+                        field.value
+                          ? `R$ ${Number(field.value).toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })}` // Formata o valor como moeda brasileira
+                          : ''
+                      }
+                      onChange={(e) => {
+                        // Remove tudo que não seja número ou vírgula
+                        const rawValue = e.target.value.replace(/[^\d,]/g, '');
+
+                        // Substitui vírgula por ponto e converte para número
+                        const numericValue =
+                          parseFloat(rawValue.replace(',', '.')) || 0;
+
+                        // Atualiza o campo no formulário com o valor numérico formatado
+                        field.onChange(numericValue.toFixed(2));
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

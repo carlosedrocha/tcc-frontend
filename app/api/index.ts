@@ -39,8 +39,8 @@ api.interceptors.request.use(async (config: any) => {
 });
 
 api.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
     if (error.response && error.response.status === 401) {
       // Redirect to the login page
       if (typeof window !== 'undefined') {

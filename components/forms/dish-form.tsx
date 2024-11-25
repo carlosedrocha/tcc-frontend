@@ -28,8 +28,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '../ui/select';
-import { useToast } from '../ui/use-toast';
 import { Textarea } from '../ui/textarea';
+import { useToast } from '../ui/use-toast';
 
 const ImgSchema = z.object({
   fileName: z.string(),
@@ -52,6 +52,7 @@ const formSchema = z.object({
     .string()
     .min(3, { message: 'Dish description must be at least 3 characters' }),
   price: z.coerce.number(),
+  disabled: z.boolean().optional(),
   photoUrl: z.string().url().optional(),
   categoriesIds: z.array(z.string().uuid()),
   items: z.array(
@@ -62,9 +63,10 @@ const formSchema = z.object({
         .min(1, { message: 'Quantity must be at least 1' })
     })
   ),
-  preparationMethod: z.string().min(1, { message: 'O modo de preparo é obrigatório' }) // Adiciona o campo preparationMethod aqui
+  preparationMethod: z
+    .string()
+    .min(1, { message: 'O modo de preparo é obrigatório' }) // Adiciona o campo preparationMethod aqui
 });
-
 
 type DishFormValues = z.infer<typeof formSchema>;
 
@@ -103,17 +105,15 @@ export const DishForm: React.FC<DishFormProps> = ({
         }
         const response = await api.get(`dish/${id}`);
         const data = response.data;
+
         currentDish = data;
-        initialData = data;
-        // initialData = {
-        //   name: data.name,
-        //   description: data.description,
-        //   price: data.price,
-        //   photoUrl: data.photoUrl,
-        //   categoriesIds: data.categories.map((category) => category.id),
-        //   items: data.items
-        // };
-        form.reset(data);
+        initialData = {
+          ...data, // mantém os demais campos
+          preparationMethod: data.recipe // mapeia recipe para preparationMethod
+        };
+
+        console.log('eu sou esse ', initialData);
+        form.reset(initialData);
       } catch (error) {
         toast({
           variant: 'destructive',
@@ -188,7 +188,7 @@ export const DishForm: React.FC<DishFormProps> = ({
 
   const onSubmit = async (data: DishFormValues) => {
     try {
-      console.log(data)
+      console.log('fui atulizado', data);
       setLoading(true);
       if (id) {
         await api.put(`/dish/${id}`, {
@@ -196,6 +196,7 @@ export const DishForm: React.FC<DishFormProps> = ({
           name: data.name,
           description: data.description,
           price: parseFloat(data.price.toString()),
+          disabled: data.disabled,
           // imgUrl: data.imgUrl,
           photoUrl: data.photoUrl ?? null,
           items: data.items,
@@ -238,7 +239,6 @@ export const DishForm: React.FC<DishFormProps> = ({
       setLoading(false);
     }
   };
-  
 
   const onDelete = async () => {
     try {
@@ -254,6 +254,15 @@ export const DishForm: React.FC<DishFormProps> = ({
   };
 
   const triggerImgUrlValidation = () => form.trigger('imgUrl');
+
+  function formatCurrency(value: number): string {
+    return `R$ ${value.toFixed(2).replace('.', ',')}`;
+  }
+
+  function parseCurrency(value: string): number {
+    // Remove caracteres inválidos e converte para número
+    return parseFloat(value.replace(/[^\d,-]/g, '').replace(',', '.') || '0');
+  }
 
   return (
     <>
@@ -277,6 +286,8 @@ export const DishForm: React.FC<DishFormProps> = ({
           className="w-full space-y-8"
         >
           <FileUpload onUploadSuccess={handleUploadSuccess} />
+
+          <FormField control={form.control} name="disabled" />
 
           <div className="gap-8 md:grid md:grid-cols-3">
             <FormField
@@ -321,7 +332,25 @@ export const DishForm: React.FC<DishFormProps> = ({
                 <FormItem>
                   <FormLabel>Preço</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} {...field} />
+                    <Input
+                      type="text"
+                      disabled={loading}
+                      value={`R$ ${field.value.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}`} // Exibe o valor formatado
+                      onChange={(e) => {
+                        // Remove tudo que não é número ou vírgula
+                        const input = e.target.value.replace(/[^\d,]/g, '');
+
+                        // Substitui vírgula por ponto e converte para número
+                        const numericValue =
+                          parseFloat(input.replace(',', '.')) || 0;
+
+                        // Atualiza o valor numérico no formulário
+                        field.onChange(numericValue);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -360,7 +389,7 @@ export const DishForm: React.FC<DishFormProps> = ({
                 </FormItem>
               )}
             /> */}
-             <FormField
+            <FormField
               control={form.control}
               name="categoriesIds"
               render={({ field }) => (
@@ -390,7 +419,7 @@ export const DishForm: React.FC<DishFormProps> = ({
                 </FormItem>
               )}
             />
-           
+
             {/* Items Form Field */}
             <div className="space-y-4 ">
               <FormLabel>Items</FormLabel>

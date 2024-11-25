@@ -7,10 +7,10 @@ import { StockEntryTable } from '@/components/tables/stock-entry-tables/stock-en
 import { buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 // Define the data structure for stock entry
@@ -30,9 +30,7 @@ export interface StockEntryI {
   };
 }
 
-const breadcrumbItems = [
-  { title: 'Entradas de Estoque', link: '/dashboard/stock-entry' }
-];
+const breadcrumbItems = [{ title: 'Estoque', link: '/dashboard/stock-entry' }];
 
 type paramsProps = {
   searchParams: {
@@ -55,6 +53,7 @@ const Page = ({ searchParams }: paramsProps) => {
       const response = await api.get('/stock', {
         params: { offset, limit: pageLimit }
       });
+      console.log(response.data);
       setData(response.data);
       setPageCount(Math.ceil(response.data.total / pageLimit));
     } catch (error) {
@@ -75,8 +74,8 @@ const Page = ({ searchParams }: paramsProps) => {
 
         <div className="flex items-start justify-between">
           <Heading
-            title={`Entradas de Estoque (${totalItems})`}
-            description="Gerencie suas entradas de estoque"
+            title={`Estoque (${totalItems})`}
+            description="Gerencie seu estoque"
           />
 
           <Link

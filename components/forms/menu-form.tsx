@@ -38,6 +38,7 @@ interface MenuFormProps {
 }
 
 export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
+  const [menuData, setMenuData] = useState<MenuFormValues | null>(null);
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,6 +47,9 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dishes, setDishes] = useState([]);
+
+  // Definir valores iniciais dependendo do menuId
   if (params['menuId'] !== 'new') {
     initialData = {
       id: params['menuId'],
@@ -56,6 +60,8 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
   } else {
     initialData = null;
   }
+
+  // Efeito para buscar os pratos ao carregar a página
   useEffect(() => {
     fetchDishes();
   }, []);
@@ -82,18 +88,54 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
     }
   };
 
-  const defaultValues = initialData
-    ? initialData
+  // Função para buscar os dados do menu
+  const fetchMenuData = async (menuId: string) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/menu/${menuId}`); // Requisição para o endpoint de obter menu pelo ID
+      if (response.status === 200) {
+        setMenuData(response.data); // Armazena os dados do menu no estado
+        console.log(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch menu data', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Atualiza os valores do formulário com os dados do menu, se disponíveis
+  const defaultValues = menuData
+    ? {
+        name: menuData.name,
+        description: menuData.description,
+        dishesId: menuData.dishesId || []
+      }
     : {
         name: '',
         description: '',
         dishesId: []
       };
+
+  // Inicializa o form com os valores padrão
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues
   });
 
+  useEffect(() => {
+    if (menuData) {
+      // Preenche os campos com os dados retornados da API
+      form.setValue('name', menuData.name); // Preenche o campo "name"
+      form.setValue('description', menuData.description); // Preenche o campo "description"
+      form.setValue(
+        'dishesId',
+        menuData.dishes.map((dish: any) => dish.id)
+      ); // Preenche os pratos
+    }
+  }, [menuData, form]);
+
+  // Função de envio do formulário
   const onSubmit = async (data: MenuFormValues) => {
     try {
       if (params['menuId'] === 'new') {
@@ -126,19 +168,24 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
           });
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 
+  // Função de exclusão do menu
   const onDelete = async () => {
     try {
       setLoading(true);
       await api.delete(`/items-type/${params.itemId}`);
     } catch (error: any) {
+      console.error(error);
     } finally {
       setLoading(false);
       setOpen(false);
     }
   };
+
   const reloadPage = () => {
     router.refresh();
     router.push(`/dashboard/menu`);
@@ -153,8 +200,17 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
         loading={loading}
       />
       <div className="flex items-center justify-between">
-        <Heading title={title} description={description} />
-        {initialData && (
+        <Heading
+          title={
+            params['menuId'] === 'new' ? 'Criar Cardápio' : 'Editar Cardápio'
+          }
+          description={
+            params['menuId'] === 'new'
+              ? 'Adicionar novo Cardápio'
+              : 'Editar Cardápio'
+          }
+        />
+        {menuData && (
           <Button
             disabled={loading}
             variant="destructive"
@@ -220,7 +276,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({ initialData }) => {
           />
 
           <Button disabled={loading} className="ml-auto" type="submit">
-            {action}
+            {params['menuId'] === 'new' ? 'Criar' : 'Salvar'}
           </Button>
         </form>
       </Form>

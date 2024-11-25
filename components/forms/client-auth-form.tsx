@@ -18,26 +18,30 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  email: z.string().email({ message: 'Enter a valid email address' }),
+  name: z
+    .string()
+    .min(3, { message: 'O nome deve ter pelo menos 3 caracteres' }),
+  cpf: z.string().regex(/^\d{11}$/, { message: 'CPF deve conter 11 dígitos' }),
+  email: z.string().email({ message: 'Digite um email válido' }),
   password: z
     .string()
-    .min(3, { message: 'Password must be at least 3 characters' })
+    .min(6, { message: 'A senha deve ter pelo menos 6 caracteres' })
 });
 
 type UserFormValue = z.infer<typeof formSchema>;
 
-export default function UserAuthForm() {
+export default function ClientAuthForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter(); // Hook de navegação
 
-  const defaultValues = {
-    email: 'admin@admin.com',
-    password: '123'
-  };
-
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
-    defaultValues
+    defaultValues: {
+      name: '',
+      cpf: '',
+      email: '',
+      password: ''
+    }
   });
 
   const onSubmit = async (data: UserFormValue) => {
@@ -59,9 +63,11 @@ export default function UserAuthForm() {
 
         localStorage.setItem('user', JSON.stringify(userData));
         router.push('/dashboard'); // Redireciona para o dashboard após login bem-sucedido
+      } else {
+        console.error('Erro no login:', response.data);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Erro na requisição:', error);
     } finally {
       setLoading(false);
     }
@@ -69,7 +75,48 @@ export default function UserAuthForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
+        {/* Campo Nome */}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome Completo</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Digite seu nome completo..."
+                  disabled={loading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Campo CPF */}
+        <FormField
+          control={form.control}
+          name="cpf"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CPF</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Digite seu CPF (somente números)..."
+                  disabled={loading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Campo Email */}
         <FormField
           control={form.control}
           name="email"
@@ -89,6 +136,7 @@ export default function UserAuthForm() {
           )}
         />
 
+        {/* Campo Senha */}
         <FormField
           control={form.control}
           name="password"
@@ -108,17 +156,9 @@ export default function UserAuthForm() {
           )}
         />
 
-        <Button disabled={loading} className="ml-auto w-full" type="submit">
-          Realizar Login
-        </Button>
-
-        {/* Segundo botão para redirecionamento */}
-        <Button
-          disabled={loading}
-          className="ml-auto w-full"
-          onClick={() => router.push('/register')} // Redireciona para /client_form
-        >
-          Realizar Cadastro
+        {/* Botão de Cadastro */}
+        <Button disabled={loading} className="w-full" type="submit">
+          {loading ? 'Carregando...' : 'Cadastrar'}
         </Button>
       </form>
     </Form>
