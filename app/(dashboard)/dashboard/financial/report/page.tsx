@@ -15,10 +15,8 @@ import { useEffect, useState } from 'react';
 
 // Enum Definitions
 export enum TransactionType {
-  SALE = 'Vendas',
-  EXPENSE = 'Despesas',
-  INCOME = 'Recebimentos',
-  PAYMENT = 'Pagamentos'
+  EXPENSE = 'Saída',
+  INCOME = 'Entrada'
 }
 
 export enum TransactionPaymentMethod {

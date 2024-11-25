@@ -1,31 +1,22 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Modal } from '@/components/ui/modal';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Heading } from '@/components/ui/heading';
-import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
+import api from '@/app/api';
+import { AlertModal } from '@/components/modal/alert-modal';
 import {
   Accordion,
+  AccordionContent,
   AccordionItem,
-  AccordionTrigger,
-  AccordionContent
+  AccordionTrigger
 } from '@/components/ui/accordion';
-import { Plus } from 'lucide-react';
-import api from '@/app/api';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Heading } from '@/components/ui/heading';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/components/ui/use-toast';
-import { AlertModal } from '@/components/modal/alert-modal';
+import { cn } from '@/lib/utils';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface DishData {
   id: string;
@@ -318,7 +309,13 @@ export default function Page() {
                             <img
                               src={dish.photoUrl}
                               alt={dish.name}
-                              style={{ width: '200px', borderRadius: '15px' }}
+                              // width={200}
+                              // height={140}
+                              style={{
+                                width: '200px',
+                                height: '140px',
+                                borderRadius: '15px'
+                              }}
                               className="mb-5 mt-5 rounded"
                             />
                           )}
@@ -475,6 +472,12 @@ export default function Page() {
                       </Button>
                     </div>
                   )}
+                  {/* <div className="flex justify-end">
+                      <Button onClick={() => handleTabBill()}>
+                        Fechar Conta
+                      </Button>
+                      {}
+                    </div> */}
                   <div style={{ textAlign: 'right', marginTop: '20px' }}>
                     <p>
                       Total:{' '}

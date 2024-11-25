@@ -162,103 +162,106 @@ export const navItems: NavItem[] = [
     title: 'Inicio',
     href: '/dashboard',
     icon: 'home',
-    label: 'home'
+    label: 'home',
+    permission: '' // Sem necessidade de permissão específica
   },
   {
     title: 'Tipo de Item',
     href: '/dashboard/item-type',
     icon: 'clipboardList',
-    label: 'clipboardList'
+    label: 'clipboardList',
+    permission: 'itemType:read'
   },
   {
     title: 'Item',
     href: '/dashboard/item',
     icon: 'beef',
-    label: 'beef'
+    label: 'beef',
+    permission: 'item:read'
   },
   {
     title: 'Categoria de Pratos',
     href: '/dashboard/category-dish',
     icon: 'scrollText',
-    label: 'scrollText'
+    label: 'scrollText',
+    permission: 'category:read'
   },
   {
     title: 'Pratos',
     href: '/dashboard/dish',
     icon: 'utensils',
-    label: 'utensils'
+    label: 'utensils',
+    permission: 'dish:read'
   },
   {
     title: 'Cardápio',
     href: '/dashboard/menu',
     icon: 'menu',
-    label: 'sandwich'
+    label: 'sandwich',
+    permission: 'menu:read'
   },
   {
     title: 'Comandas',
     href: '/dashboard/tabs',
     icon: 'tab',
-    label: 'tab'
+    label: 'tab',
+    permission: 'tab:read'
   },
   {
     title: 'Funcionários',
     href: '/dashboard/employee',
     icon: 'employee',
-    label: 'employee'
+    label: 'employee',
+    permission: 'employee:read'
   },
   {
-    title: 'Gastos',
-    href: '/dashboard/expense',
-    icon: 'employee',
-    label: 'employee'
-  },
-  {
-    title: 'Entrada Estoque',
+    title: 'Estoque',
     href: '/dashboard/stock',
     icon: 'sandwich',
-    label: 'sandwich'
+    label: 'sandwich',
+    permission: 'stock:read' // Sem uma permissão correspondente no retorno
   },
-  // {
-  //   title: 'Mudar o',
-  //   href: '/dashboard/profile',
-  //   icon: 'profile',
-  //   label: 'profile'
-  // },
   {
     title: 'Kanban',
     href: '/dashboard/kanban',
     icon: 'kanban',
-    label: 'kanban'
+    label: 'kanban',
+    permission: 'kanban:read' // Sem uma permissão correspondente no retorno
   },
   {
     title: 'Campainha',
     href: '/dashboard/waiter-bell',
     icon: 'conciergeBell',
-    label: 'bell'
+    label: 'bell',
+    permission: 'waiter' // Sem uma permissão correspondente no retorno
   },
   {
     title: 'Financeiro - Relatório',
     href: '/dashboard/financial/report',
     icon: 'conciergeBell',
-    label: 'bell'
+    label: 'bell',
+    permission: 'financial-report:read' // Sem uma permissão correspondente no retorno
   },
   {
     title: 'Financeiro - Dashboard',
     href: '/dashboard/financial/dashboard',
     icon: 'conciergeBell',
-    label: 'bell'
+    label: 'bell',
+    permission: 'financial-dashboard:read' // Sem uma permissão correspondente no retorno
   },
   {
     title: 'Spotify',
     href: '/dashboard/queue-spotify',
     icon: 'song',
-    label: 'song'
+    label: 'song',
+    permission: 'spotify:read'
   },
   {
     title: 'Logout',
     href: '/',
     icon: 'logout',
-    label: 'logout'
+    label: 'logout',
+    permission: '' // Sem necessidade de permissão específica
   }
 ];
 
