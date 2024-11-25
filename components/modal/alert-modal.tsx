@@ -1,7 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
+import { useEffect, useState } from 'react';
 
 interface AlertModalProps {
   isOpen: boolean;
@@ -28,7 +28,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
 
   return (
     <Modal
-      title="Voce tem certeza ?"
+      title="Tem certeza?"
       description="Essa ação é irreversível."
       isOpen={isOpen}
       onClose={onClose}

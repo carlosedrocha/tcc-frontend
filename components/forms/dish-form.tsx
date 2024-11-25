@@ -28,8 +28,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '../ui/select';
-import { useToast } from '../ui/use-toast';
 import { Textarea } from '../ui/textarea';
+import { useToast } from '../ui/use-toast';
 
 const ImgSchema = z.object({
   fileName: z.string(),
@@ -52,6 +52,7 @@ const formSchema = z.object({
     .string()
     .min(3, { message: 'Dish description must be at least 3 characters' }),
   price: z.coerce.number(),
+  disabled: z.boolean().optional(),
   photoUrl: z.string().url().optional(),
   categoriesIds: z.array(z.string().uuid()),
   items: z.array(
@@ -195,6 +196,7 @@ export const DishForm: React.FC<DishFormProps> = ({
           name: data.name,
           description: data.description,
           price: parseFloat(data.price.toString()),
+          disabled: data.disabled,
           // imgUrl: data.imgUrl,
           photoUrl: data.photoUrl ?? null,
           items: data.items,
@@ -284,6 +286,8 @@ export const DishForm: React.FC<DishFormProps> = ({
           className="w-full space-y-8"
         >
           <FileUpload onUploadSuccess={handleUploadSuccess} />
+
+          <FormField control={form.control} name="disabled" />
 
           <div className="gap-8 md:grid md:grid-cols-3">
             <FormField

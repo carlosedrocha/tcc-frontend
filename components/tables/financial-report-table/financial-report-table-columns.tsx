@@ -6,7 +6,6 @@ import {
 } from '@/app/(dashboard)/dashboard/financial/report/page';
 import { ColumnDef } from '@tanstack/react-table';
 
-
 // Funções para traduzir os valores com base nos enums
 const translateTransactionType = (value: string) => {
   return TransactionType[value as keyof typeof TransactionType] || value;
@@ -85,7 +84,10 @@ export const columns: ColumnDef<IFinancialReport>[] = [
     cell: ({ row }) => {
       const dateValue = row.getValue<string>('date');
       return dateValue
-        ? new Intl.DateTimeFormat('pt-BR').format(new Date(dateValue))
+        ? new Intl.DateTimeFormat('pt-BR', {
+            dateStyle: 'short',
+            timeStyle: 'short'
+          }).format(new Date(dateValue))
         : '';
     }
   }
