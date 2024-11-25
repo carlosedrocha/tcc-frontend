@@ -50,7 +50,7 @@ export default function UserAuthForm() {
         const { user } = response.data;
         const { id: userId, email, entity } = user;
         const { firstName, lastName } = entity;
-
+        console.log(response.data);
         const userData = {
           userId,
           name: `${firstName} ${lastName}`, // Concatena o nome completo
@@ -58,6 +58,26 @@ export default function UserAuthForm() {
         };
 
         localStorage.setItem('user', JSON.stringify(userData));
+        const token = response.data.bearer_token;
+        //const name = response.data.user.name;
+        // const userId = response.data.userId;
+
+        // const email = response.data?.user?.email;
+
+        // const name = `${response.data?.user?.entity?.firstName} ${response.data?.user?.entity?.lastName}`;
+
+        const role = response.data?.user?.role?.name;
+
+        const permissions = response.data?.user?.role?.permissions;
+
+        sessionStorage.setItem('token', JSON.stringify(token));
+        //sessionStorage.setItem('name', JSON.stringify(name));
+        sessionStorage.setItem('userId', JSON.stringify(userId));
+        //sessionStorage.setItem('email', JSON.stringify(data.email));
+        //  sessionStorage.setItem('email', JSON.stringify(email));
+        // sessionStorage.setItem('name', JSON.stringify(name));
+        sessionStorage.setItem('role', JSON.stringify(role));
+        sessionStorage.setItem('permissions', JSON.stringify(permissions));
         router.push('/dashboard'); // Redireciona para o dashboard após login bem-sucedido
       }
     } catch (error) {
