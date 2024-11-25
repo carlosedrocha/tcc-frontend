@@ -1,8 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
-import io from 'socket.io-client';
-import { BellRing, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import BreadCrumb from '@/components/breadcrumb';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -12,9 +9,11 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import BreadCrumb from '@/components/breadcrumb';
 import { Heading } from '@/components/ui/heading';
+import { cn } from '@/lib/utils';
+import { Check } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import io from 'socket.io-client';
 
 let socket: ReturnType<typeof io> | null = null;
 const breadcrumbItems = [{ title: 'Campainha', link: '/dashboard/campainha' }];
