@@ -1,13 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Heading } from '@/components/ui/heading';
-import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
+import { AlertModal } from '@/components/modal/alert-modal';
 import {
   Accordion,
   AccordionContent,

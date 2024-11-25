@@ -17,16 +17,45 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+// Schema de validação ajustado para o DTO
 const formSchema = z.object({
-  name: z
-    .string()
-    .min(3, { message: 'O nome deve ter pelo menos 3 caracteres' }),
-  cpf: z.string().regex(/^\d{11}$/, { message: 'CPF deve conter 11 dígitos' }),
   email: z.string().email({ message: 'Digite um email válido' }),
   password: z
     .string()
-    .min(6, { message: 'A senha deve ter pelo menos 6 caracteres' })
+    .min(6, { message: 'A senha deve ter pelo menos 6 caracteres' }),
+  firstName: z.string().min(1, { message: 'O primeiro nome é obrigatório' }),
+  lastName: z.string().min(1, { message: 'O sobrenome é obrigatório' }),
+  cpf: z
+    .string()
+    .optional()
+    .refine((cpf) => !cpf || validateCpf(cpf), {
+      message: 'CPF inválido'
+    })
 });
+
+// Função para validar o CPF usando o algoritmo oficial
+function validateCpf(cpf: string): boolean {
+  if (!/^\d{11}$/.test(cpf)) return false; // Deve conter exatamente 11 dígitos
+  const digits = cpf.split('').map(Number);
+
+  // Verificar se todos os números são iguais (exemplo: 111.111.111-11)
+  if (digits.every((digit) => digit === digits[0])) return false;
+
+  // Calcular o primeiro dígito verificador
+  const calcVerifier = (factor: number) =>
+    digits
+      .slice(0, factor - 1)
+      .reduce((sum, num, idx) => sum + num * (factor - idx), 0) % 11;
+
+  const firstVerifier = (11 - calcVerifier(10)) % 10;
+  if (firstVerifier !== digits[9]) return false;
+
+  // Calcular o segundo dígito verificador
+  const secondVerifier = (11 - calcVerifier(11)) % 10;
+  return secondVerifier === digits[10];
+}
+
+
 
 type UserFormValue = z.infer<typeof formSchema>;
 
@@ -37,10 +66,11 @@ export default function ClientAuthForm() {
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      cpf: '',
       email: '',
-      password: ''
+      password: '',
+      firstName: '',
+      lastName: '',
+      cpf: ''
     }
   });
 
@@ -49,7 +79,7 @@ export default function ClientAuthForm() {
     sessionStorage.clear();
     try {
       setLoading(true);
-      const response = await api.post('/auth/local/signin', data);
+      const response = await api.post('auth/customer/local/signup', data);
       if (response.status === 200) {
         const { user } = response.data;
         const { id: userId, email, entity } = user;
@@ -57,7 +87,7 @@ export default function ClientAuthForm() {
 
         const userData = {
           userId,
-          name: `${firstName} ${lastName}`, // Concatena o nome completo
+          name: `${firstName} ${lastName}`,
           email
         };
 
@@ -73,28 +103,67 @@ export default function ClientAuthForm() {
     }
   };
 
+  // Função para formatar o CPF
+  function formatCpf(value: string) {
+    // Remove todos os caracteres não numéricos
+    const digits = value.replace(/\D/g, '');
+    // Aplica a máscara
+    return digits
+      .replace(/^(\d{3})(\d)/, '$1.$2')
+      .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+      .replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2');
+  }
+
+  // Função para remover a máscara
+  function unmaskCpf(value: string) {
+    return value.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
-        {/* Campo Nome */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome Completo</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder="Digite seu nome completo..."
-                  disabled={loading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Campos Nome e Sobrenome lado a lado */}
+        <div className="flex space-x-4">
+          {/* Campo Primeiro Nome */}
+          <FormField
+            control={form.control}
+            name="firstName"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Primeiro Nome</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Digite seu primeiro nome..."
+                    disabled={loading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Campo Sobrenome */}
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Sobrenome</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Digite seu sobrenome..."
+                    disabled={loading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Campo CPF */}
         <FormField
@@ -106,9 +175,10 @@ export default function ClientAuthForm() {
               <FormControl>
                 <Input
                   type="text"
-                  placeholder="Digite seu CPF (somente números)..."
+                  placeholder="Digite seu CPF..."
                   disabled={loading}
-                  {...field}
+                  value={formatCpf(field.value)} // Formata enquanto o usuário digita
+                  onChange={(e) => field.onChange(unmaskCpf(e.target.value))} // Remove a máscara antes de enviar ao Zod
                 />
               </FormControl>
               <FormMessage />
